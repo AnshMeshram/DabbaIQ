@@ -1,0 +1,62 @@
+# Render Infrastructure Blueprint for DabbaIQ
+# https://render.com/docs/blueprint-spec
+
+services:
+  # ─── FastAPI Backend Service ──────────────────────────────
+  - type: web
+    name: dabbaiq-backend
+    env: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: MONGODB_DATABASE
+        value: dabbaiq
+      - key: MONGODB_URI
+        sync: false # Set securely in Render Dashboard
+      - key: AI_PROVIDER
+        value: ollama
+      - key: OLLAMA_BASE_URL
+        sync: false # Set to reachable remote/cloud inference endpoint
+      - key: OLLAMA_MODEL
+        value: gemma3:4b
+      - key: ELEVENLABS_API_KEY
+        sync: false # Optional: set in Render Dashboard for STT voice notes
+      - key: BACKBOARD_API_KEY
+        sync: false # Optional
+      - key: TINKER_API_KEY
+        sync: false # Optional
+      - key: FRONTEND_ORIGIN
+        fromService:
+          type: web
+          name: dabbaiq-frontend
+          property: url
+      - key: CORS_ORIGINS
+        fromService:
+          type: web
+          name: dabbaiq-frontend
+          property: url
+
+  # ─── Next.js Frontend Web Service ─────────────────────────
+  - type: web
+    name: dabbaiq-frontend
+    env: node
+    region: oregon
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_BASE_URL
+        fromService:
+          type: web
+          name: dabbaiq-backend
+          property: url
+          format: "{value}/api"
