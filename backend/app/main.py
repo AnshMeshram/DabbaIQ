@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.db.connection import connect_db, disconnect_db
 from app.db.tiger_data import connect_tiger_db, disconnect_tiger_db
-from app.api.routes import router
+from app.api import api_router
 
 # Configure logging
 logging.basicConfig(
@@ -61,7 +61,7 @@ app.add_middleware(
 )
 
 # Mount API routes
-app.include_router(router, prefix="/api")
+app.include_router(api_router, prefix="/api")
 
 
 @app.get("/")

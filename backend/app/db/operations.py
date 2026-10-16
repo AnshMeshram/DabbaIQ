@@ -9,8 +9,8 @@ from app.schemas.schemas import (
     IngredientCreate, IngredientUpdate,
     RecipeCreate, RecipeUpdate, RecipeIngredient,
     SaleCreate, SaleUpdate,
-    WasteCreate,
-    PlanRecipeItem, ShoppingItem, ForecastDetail,
+    WasteCreate, WasteUpdate,
+    PlanRecipeItem, ShoppingItem, ForecastDetail, PlanUpdate,
     convert_units, units_compatible,
 )
 
@@ -151,6 +151,35 @@ async def delete_ingredient(ingredient_id: str) -> bool:
     return result.deleted_count > 0
 
 
+async def is_ingredient_in_use(ingredient_id: str) -> bool:
+    """Check if an ingredient is referenced in any recipe."""
+    db = get_db()
+    if db is None:
+        return False
+    found = await db.recipes.find_one({"ingredients.ingredient_id": ingredient_id})
+    return found is not None
+
+
+async def adjust_ingredient_stock(ingredient_id: str, delta: float) -> Optional[dict]:
+    """Atomically adjust ingredient inventory stock, enforcing non-negative quantity."""
+    db = get_db()
+    if db is None:
+        raise ConnectionError("Database not connected")
+
+    existing = await get_ingredient_by_id(ingredient_id)
+    if not existing:
+        return None
+
+    current_qty = float(existing.get("quantity", 0.0))
+    new_qty = max(0.0, round(current_qty + delta, 3))
+
+    await db.ingredients.update_one(
+        {"_id": _oid(ingredient_id)},
+        {"$set": {"quantity": new_qty, "updated_at": _utc_now()}}
+    )
+    return await get_ingredient_by_id(ingredient_id)
+
+
 # ─── Recipes ─────────────────────────────────────────────────────────────────
 
 async def create_recipe(data: RecipeCreate, is_demo: bool = False) -> dict:
@@ -264,6 +293,76 @@ async def delete_recipe(recipe_id: str) -> bool:
     return result.deleted_count > 0
 
 
+async def is_recipe_in_use(recipe_id: str) -> bool:
+    """Check if a recipe is referenced by historical sales or active prep plans."""
+    db = get_db()
+    if db is None:
+        return False
+    sale = await db.sales.find_one({"recipe_id": recipe_id})
+    if sale:
+        return True
+    plan = await db.plans.find_one({"recipes.recipe_id": recipe_id})
+    if plan:
+        return True
+    return False
+
+
+async def calculate_recipe_requirements(recipe_id: str, portions: int) -> Optional[dict]:
+    """Calculate ingredient requirements, stock shortages, and total cost for given portions."""
+    recipe = await get_recipe_by_id(recipe_id)
+    if not recipe:
+        return None
+
+    items = []
+    total_cost = 0.0
+
+    for ing in recipe.get("ingredients", []):
+        ing_id = ing.get("ingredient_id", "")
+        qty_needed = ing.get("quantity_per_portion", 0.0) * portions
+        ing_unit = ing.get("unit", "")
+        stored = await get_ingredient_by_id(ing_id)
+
+        available = 0.0
+        cost_per_unit = 0.0
+        ing_name = ing.get("ingredient_name", "")
+
+        if stored:
+            ing_name = stored.get("name", ing_name)
+            cost_per_unit = stored.get("cost_per_unit", 0.0)
+            stored_unit = stored.get("unit", ing_unit)
+            stored_qty = stored.get("quantity", 0.0)
+
+            if stored_unit == ing_unit:
+                available = stored_qty
+            elif units_compatible(stored_unit, ing_unit):
+                available = convert_units(stored_qty, stored_unit, ing_unit)
+
+        shortage = max(0.0, qty_needed - available)
+        estimated_cost = round(qty_needed * cost_per_unit, 2)
+        total_cost += estimated_cost
+
+        items.append({
+            "ingredient_id": ing_id,
+            "ingredient_name": ing_name,
+            "required_qty": round(qty_needed, 3),
+            "available_qty": round(available, 3),
+            "shortage_qty": round(shortage, 3),
+            "unit": ing_unit,
+            "estimated_cost": estimated_cost,
+        })
+
+    cost_per_portion = round(total_cost / portions, 2) if portions > 0 else 0.0
+
+    return {
+        "recipe_id": recipe_id,
+        "recipe_name": recipe["name"],
+        "portions": portions,
+        "estimated_total_cost": round(total_cost, 2),
+        "estimated_cost_per_portion": cost_per_portion,
+        "ingredients": items,
+    }
+
+
 # ─── Sales ───────────────────────────────────────────────────────────────────
 
 async def create_sale(data: SaleCreate, is_demo: bool = False) -> dict:
@@ -345,6 +444,14 @@ async def delete_sale(sale_id: str) -> bool:
     return result.deleted_count > 0
 
 
+async def get_sale_by_id(sale_id: str) -> Optional[dict]:
+    db = get_db()
+    if db is None:
+        return None
+    doc = await db.sales.find_one({"_id": _oid(sale_id)})
+    return _serialize(doc) if doc else None
+
+
 # ─── Waste ───────────────────────────────────────────────────────────────────
 
 async def create_waste(data: WasteCreate, is_demo: bool = False) -> dict:
@@ -398,6 +505,55 @@ async def get_waste(
     return results
 
 
+async def get_waste_by_id(waste_id: str) -> Optional[dict]:
+    db = get_db()
+    if db is None:
+        return None
+    doc = await db.waste.find_one({"_id": _oid(waste_id)})
+    return _serialize(doc) if doc else None
+
+
+async def update_waste(waste_id: str, data: WasteUpdate) -> Optional[dict]:
+    db = get_db()
+    if db is None:
+        raise ConnectionError("Database not connected")
+
+    existing = await db.waste.find_one({"_id": _oid(waste_id)})
+    if not existing:
+        return None
+
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    if "date" in update_data:
+        update_data["date"] = _date_to_str(update_data["date"])
+
+    prepared = update_data.get("portions_prepared", existing.get("portions_prepared", 0))
+    sold = update_data.get("portions_sold", existing.get("portions_sold", 0))
+    leftover = max(0, prepared - sold)
+    update_data["leftover_portions"] = leftover
+
+    recipe_id = update_data.get("recipe_id", existing.get("recipe_id"))
+    recipe = await get_recipe_by_id(recipe_id)
+    if recipe:
+        update_data["recipe_name"] = recipe["name"]
+        cost_per_portion = recipe.get("estimated_cost_per_portion", 0)
+        update_data["estimated_waste_cost"] = round(leftover * cost_per_portion, 2)
+
+    update_data["updated_at"] = _utc_now()
+    await db.waste.update_one(
+        {"_id": _oid(waste_id)},
+        {"$set": update_data}
+    )
+    return await get_waste_by_id(waste_id)
+
+
+async def delete_waste(waste_id: str) -> bool:
+    db = get_db()
+    if db is None:
+        raise ConnectionError("Database not connected")
+    result = await db.waste.delete_one({"_id": _oid(waste_id)})
+    return result.deleted_count > 0
+
+
 # ─── Plans ───────────────────────────────────────────────────────────────────
 
 async def save_plan(plan_data: dict) -> dict:
@@ -421,12 +577,52 @@ async def confirm_plan(plan_id: str) -> Optional[dict]:
     if db is None:
         raise ConnectionError("Database not connected")
 
+    existing = await db.plans.find_one({"_id": _oid(plan_id)})
+    if not existing:
+        return None
+
+    if existing.get("is_confirmed"):
+        doc = _serialize(existing)
+        doc["already_confirmed"] = True
+        return doc
+
     await db.plans.update_one(
         {"_id": _oid(plan_id)},
         {"$set": {"is_confirmed": True, "confirmed_at": _utc_now()}}
     )
     doc = await db.plans.find_one({"_id": _oid(plan_id)})
     return _serialize(doc) if doc else None
+
+
+async def update_plan(plan_id: str, data: PlanUpdate | dict) -> Optional[dict]:
+    db = get_db()
+    if db is None:
+        raise ConnectionError("Database not connected")
+
+    existing = await db.plans.find_one({"_id": _oid(plan_id)})
+    if not existing:
+        return None
+
+    if isinstance(data, PlanUpdate):
+        update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    else:
+        update_data = dict(data)
+
+    update_data["updated_at"] = _utc_now()
+    await db.plans.update_one(
+        {"_id": _oid(plan_id)},
+        {"$set": update_data}
+    )
+    doc = await db.plans.find_one({"_id": _oid(plan_id)})
+    return _serialize(doc) if doc else None
+
+
+async def delete_plan(plan_id: str) -> bool:
+    db = get_db()
+    if db is None:
+        raise ConnectionError("Database not connected")
+    result = await db.plans.delete_one({"_id": _oid(plan_id)})
+    return result.deleted_count > 0
 
 
 async def get_plans(

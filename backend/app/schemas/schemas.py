@@ -1,8 +1,8 @@
 """Pydantic schemas for DabbaIQ data validation."""
 
 from datetime import datetime, date
-from typing import Optional, List
-from pydantic import BaseModel, Field, field_validator
+from typing import Optional, List, Any
+from pydantic import BaseModel, Field, field_validator, model_validator
 from enum import Enum
 
 
@@ -89,6 +89,10 @@ class IngredientUpdate(BaseModel):
     expiry_date: Optional[date] = None
 
 
+class StockAdjustRequest(BaseModel):
+    delta: float = Field(..., description="Relative stock delta (+1, +5, -1, etc.)")
+
+
 class IngredientResponse(IngredientBase):
     id: str
     is_low_stock: bool = False
@@ -138,6 +142,36 @@ class RecipeResponse(RecipeBase):
     is_demo: bool = False
     created_at: datetime
     updated_at: datetime
+
+
+class RecipeRequirementsItem(BaseModel):
+    ingredient_id: str
+    ingredient_name: str
+    required_qty: float
+    available_qty: float
+    shortage_qty: float
+    unit: str
+    estimated_cost: float
+
+
+class RecipeRequirementsResponse(BaseModel):
+    recipe_id: str
+    recipe_name: str
+    portions: int
+    estimated_total_cost: float
+    estimated_cost_per_portion: float
+    ingredients: List[RecipeRequirementsItem]
+    estimated_cost: Optional[float] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def sync_cost_fields(cls, values: Any) -> Any:
+        if isinstance(values, dict):
+            if "estimated_total_cost" in values and "estimated_cost" not in values:
+                values["estimated_cost"] = values["estimated_total_cost"]
+            elif "estimated_cost" in values and "estimated_total_cost" not in values:
+                values["estimated_total_cost"] = values["estimated_cost"]
+        return values
 
 
 # ─── Sales Schemas ───────────────────────────────────────────────────────────
@@ -191,6 +225,16 @@ class WasteBase(BaseModel):
 
 class WasteCreate(WasteBase):
     pass
+
+
+class WasteUpdate(BaseModel):
+    date: Optional[date] = None
+    meal_period: Optional[MealPeriod] = None
+    recipe_id: Optional[str] = None
+    recipe_name: Optional[str] = None
+    portions_prepared: Optional[int] = Field(None, gt=0)
+    portions_sold: Optional[int] = Field(None, ge=0)
+    reason: Optional[str] = None
 
 
 class WasteResponse(WasteBase):
@@ -252,6 +296,15 @@ class PlanResponse(BaseModel):
     ai_menu_suggestion: Optional[str] = None
     is_confirmed: bool = False
     created_at: datetime
+
+
+class PlanUpdate(BaseModel):
+    recipes: Optional[List[PlanRecipeItem]] = None
+    shopping_list: Optional[List[ShoppingItem]] = None
+    is_confirmed: Optional[bool] = None
+    ai_recommendation: Optional[str] = None
+    ai_menu_suggestion: Optional[str] = None
+    kitchen_notes: Optional[str] = None
 
 
 # ─── AI Schemas ──────────────────────────────────────────────────────────────
