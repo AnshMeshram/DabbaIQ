@@ -183,7 +183,7 @@ export default function Navbar() {
 
                 {/* Station Popover */}
                 {stationOpen && (
-                  <div className="absolute left-0 mt-2 w-80 bg-surface-container-lowest rounded-xl border border-outline-variant shadow-xl p-4 z-50 text-left animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="absolute left-0 mt-2 w-80 bg-white rounded-xl border border-outline-variant shadow-2xl ring-1 ring-black/5 p-4 z-50 text-left animate-in fade-in slide-in-from-top-2 duration-150">
                     <div className="flex items-center justify-between pb-2 border-b border-outline-variant/40">
                       <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-primary">
                         <MapPin className="w-4 h-4 text-primary" /> MUM-04 Central Rail Station
@@ -263,23 +263,23 @@ export default function Navbar() {
 
                 {/* Health Flyout Popover */}
                 {healthOpen && (
-                  <div className="absolute right-0 mt-2 w-72 bg-surface-container-lowest rounded-xl border border-outline-variant shadow-xl p-4 z-50 text-left animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="absolute right-0 mt-2 w-80 sm:w-96 max-w-[calc(100vw-2rem)] bg-white rounded-xl border border-outline-variant shadow-2xl ring-1 ring-black/5 p-4 z-50 text-left animate-in fade-in slide-in-from-top-2 duration-150">
                     <div className="flex items-center justify-between pb-2 border-b border-outline-variant/40 font-mono text-xs font-bold text-on-surface">
                       <div className="flex items-center gap-1.5">
                         <Activity className="w-4 h-4 text-primary" /> System Telemetry
                       </div>
-                      <span className="text-[10px] text-primary bg-primary-fixed/40 px-1.5 py-0.2 rounded font-semibold">
+                      <span className="text-[10px] text-primary bg-primary-fixed/40 px-1.5 py-0.5 rounded font-semibold">
                         HEALTHY
                       </span>
                     </div>
                     <div className="space-y-3 py-3 text-xs font-mono">
-                      <div className="flex items-start gap-2">
-                        <Database className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-on-surface">MongoDB Atlas</span>
+                      <div className="flex items-start gap-2.5">
+                        <Database className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-semibold text-on-surface truncate">MongoDB Atlas</span>
                             <span
-                              className={`text-[10px] px-1 rounded ${
+                              className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 font-medium ${
                                 health?.db_connected
                                   ? 'bg-primary-fixed text-on-primary-fixed'
                                   : 'bg-amber-100 text-amber-800'
@@ -288,19 +288,22 @@ export default function Navbar() {
                               {health?.db_connected ? 'Connected' : 'Degraded'}
                             </span>
                           </div>
-                          <div className="text-[10px] text-on-surface-variant truncate">
+                          <div
+                            className="text-[11px] text-on-surface-variant truncate mt-0.5"
+                            title={health?.db_message || 'Active Atlas Replica Set'}
+                          >
                             {health?.db_message || 'Active Atlas Replica Set'}
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-2">
-                        <Cpu className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-on-surface">Gemma 2 AI</span>
+                      <div className="flex items-start gap-2.5">
+                        <Cpu className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-semibold text-on-surface truncate">Gemma 2 AI</span>
                             <span
-                              className={`text-[10px] px-1 rounded ${
+                              className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 font-medium ${
                                 aiStatus?.available
                                   ? 'bg-primary-fixed text-on-primary-fixed'
                                   : 'bg-stone-200 text-stone-700'
@@ -309,22 +312,25 @@ export default function Navbar() {
                               {aiStatus?.available ? 'Ready' : 'Offline'}
                             </span>
                           </div>
-                          <div className="text-[10px] text-on-surface-variant truncate">
+                          <div
+                            className="text-[11px] text-on-surface-variant truncate mt-0.5"
+                            title={aiStatus?.message || 'Ollama Gemma 2:9b reasoning engine'}
+                          >
                             {aiStatus?.message || 'Ollama Gemma 2:9b reasoning engine'}
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-2">
-                        <GitBranch className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-on-surface">Temporal Engine</span>
-                            <span className="text-[10px] px-1 rounded bg-primary-fixed text-on-primary-fixed">
+                      <div className="flex items-start gap-2.5">
+                        <GitBranch className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-semibold text-on-surface truncate">Temporal Engine</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary-fixed text-on-primary-fixed shrink-0 font-medium">
                               Synchronized
                             </span>
                           </div>
-                          <div className="text-[10px] text-on-surface-variant">
+                          <div className="text-[11px] text-on-surface-variant truncate mt-0.5">
                             Resilient Kitchen Workflow Orchestrator
                           </div>
                         </div>
@@ -371,7 +377,7 @@ export default function Navbar() {
 
                 {/* Profile Flyout */}
                 {profileOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-surface-container-lowest rounded-xl border border-outline-variant shadow-xl p-3 z-50 text-left animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl border border-outline-variant shadow-2xl ring-1 ring-black/5 p-3 z-50 text-left animate-in fade-in slide-in-from-top-2 duration-150">
                     <div className="flex items-center gap-2.5 pb-2.5 border-b border-outline-variant/40">
                       <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-bold font-mono">
                         GP
