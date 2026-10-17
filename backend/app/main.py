@@ -24,6 +24,11 @@ async def lifespan(app: FastAPI):
     connected = await connect_db()
     if connected:
         logger.info("MongoDB connected successfully")
+        try:
+            from app.db.seed import auto_seed_if_empty
+            await auto_seed_if_empty()
+        except Exception as e:
+            logger.warning("Auto-seed error on startup: %s", e)
     else:
         logger.warning(
             "Running without MongoDB. Set MONGODB_URI in backend/.env to enable storage."

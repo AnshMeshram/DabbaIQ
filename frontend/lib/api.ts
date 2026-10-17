@@ -392,6 +392,10 @@ export const api = {
 
   // Integrations & Diagnostics
   getIntegrationsStatus: () => fetchJSON<IntegrationsStatus>(`${API_BASE_URL}/integrations/status`),
+  seedStarterData: (clean: boolean = false) =>
+    fetchJSON<{ status: string; seeded: boolean; message: string }>(`${API_BASE_URL}/seed?clean=${clean}`, {
+      method: 'POST',
+    }),
 
   // Voice Kitchen Notes (ElevenLabs STT)
   transcribeVoiceNote: async (audioFile: File) => {

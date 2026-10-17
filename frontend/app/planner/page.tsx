@@ -42,6 +42,7 @@ export default function PlannerPage() {
   const [voiceNotice, setVoiceNotice] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
+  const [seeding, setSeeding] = useState(false);
   const [plan, setPlan] = useState<PrepPlan | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -58,6 +59,21 @@ export default function PlannerPage() {
       })
       .catch((err) => setError('Failed to load recipe library: ' + err.message));
   }, []);
+
+  const handleLoadStarterMenu = async () => {
+    setSeeding(true);
+    setError(null);
+    try {
+      await api.seedStarterData();
+      const res = await api.getRecipes();
+      setRecipes(res.items);
+      setSelectedRecipes(res.items.map((r) => r.id));
+    } catch (err: any) {
+      setError('Failed to seed starter recipes: ' + (err.message || String(err)));
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   const toggleRecipe = (id: string) => {
     if (selectedRecipes.includes(id)) {
@@ -245,50 +261,71 @@ export default function PlannerPage() {
             Select Dishes &amp; Log Confirmed Advance Orders
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {recipes.map((recipe) => {
-              const isSelected = selectedRecipes.includes(recipe.id);
-              return (
-                <div
-                  key={recipe.id}
-                  className={`border rounded-xl p-3 flex flex-col justify-between transition-all ${
-                    isSelected
-                      ? 'border-primary bg-primary-fixed/20 shadow-[0_2px_0_0_#18542a]'
-                      : 'border-outline-variant/60 bg-surface-container-low opacity-75'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleRecipe(recipe.id)}
-                        className="rounded text-primary focus:ring-primary w-4 h-4"
-                      />
-                      <span className="font-headline font-bold text-xs text-on-surface">
-                        {recipe.name}
-                      </span>
-                    </label>
-                    <span className="font-mono text-[10px] uppercase font-bold text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded">
-                      {recipe.meal_category}
-                    </span>
-                  </div>
-
-                  {isSelected && (
-                    <div className="mt-2.5 pt-2 border-t border-outline-variant/40 flex items-center justify-between text-xs font-mono">
-                      <span className="text-on-surface-variant text-[11px]">Advance Orders:</span>
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="0"
-                        value={confirmedOrders[recipe.id] || ''}
-                        onChange={(e) => handleOrderChange(recipe.id, e.target.value)}
-                        className="w-16 border border-outline-variant rounded px-2 py-0.5 text-right font-bold text-xs bg-white text-primary outline-none focus:border-primary"
-                      />
-                    </div>
-                  )}
+            {recipes.length === 0 ? (
+              <div className="col-span-full p-6 text-center bg-surface-container-low border border-dashed border-outline-variant/60 rounded-xl space-y-3">
+                <ChefHat className="w-8 h-8 text-primary mx-auto opacity-70" />
+                <div className="text-xs font-semibold text-on-surface">
+                  No recipes found in connected MongoDB storage
                 </div>
-              );
-            })}
+                <p className="text-[11px] font-mono text-on-surface-variant max-w-md mx-auto">
+                  Your new MongoDB Atlas database is connected but has not been populated with standard recipes yet.
+                </p>
+                <button
+                  type="button"
+                  disabled={seeding}
+                  onClick={handleLoadStarterMenu}
+                  className="btn-secondary text-xs px-4 py-2 font-mono inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{seeding ? 'Seeding Kitchen Data...' : 'Load Starter Tiffin Menu (5 Recipes)'}</span>
+                </button>
+              </div>
+            ) : (
+              recipes.map((recipe) => {
+                const isSelected = selectedRecipes.includes(recipe.id);
+                return (
+                  <div
+                    key={recipe.id}
+                    className={`border rounded-xl p-3 flex flex-col justify-between transition-all ${
+                      isSelected
+                        ? 'border-primary bg-primary-fixed/20 shadow-[0_2px_0_0_#18542a]'
+                        : 'border-outline-variant/60 bg-surface-container-low opacity-75'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleRecipe(recipe.id)}
+                          className="rounded text-primary focus:ring-primary w-4 h-4"
+                        />
+                        <span className="font-headline font-bold text-xs text-on-surface">
+                          {recipe.name}
+                        </span>
+                      </label>
+                      <span className="font-mono text-[10px] uppercase font-bold text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded">
+                        {recipe.meal_category}
+                      </span>
+                    </div>
+
+                    {isSelected && (
+                      <div className="mt-2.5 pt-2 border-t border-outline-variant/40 flex items-center justify-between text-xs font-mono">
+                        <span className="text-on-surface-variant text-[11px]">Advance Orders:</span>
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder="0"
+                          value={confirmedOrders[recipe.id] || ''}
+                          onChange={(e) => handleOrderChange(recipe.id, e.target.value)}
+                          className="w-16 border border-outline-variant rounded px-2 py-0.5 text-right font-bold text-xs bg-white text-primary outline-none focus:border-primary"
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 

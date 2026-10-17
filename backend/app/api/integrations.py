@@ -208,3 +208,27 @@ async def export_training_dataset():
         "examples": dataset[:10],
         "message": f"Generated {len(dataset)} instruction-tuning examples from historical kitchen data.",
     }
+
+
+# ─── Starter Menu & Inventory Seed Endpoint ──────────────────────────────────
+
+@router.post("/seed")
+async def seed_starter_data(clean: bool = False):
+    """Seed starter kitchen recipes, pantry ingredients, and sales history."""
+    from app.db.seed import seed_demo_data
+    from app.db.connection import get_db
+
+    db = get_db()
+    if db is None:
+        raise HTTPException(
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+            "Database connection unavailable. Ensure MONGODB_URI is configured.",
+        )
+
+    success = await seed_demo_data(force=clean)
+    return {
+        "status": "ok",
+        "seeded": success,
+        "message": "Starter kitchen recipes and inventory ready." if success else "Database already populated.",
+    }
+
