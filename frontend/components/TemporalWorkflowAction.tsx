@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import { api, WorkflowTriggerResponse } from '@/lib/api';
-import { useUIStore } from '@/lib/store';
-import { Play, CheckCircle2, Clock, Terminal, AlertTriangle, RefreshCw, ArrowRight } from 'lucide-react';
+import { Play, CheckCircle2, Clock, Terminal, AlertTriangle, RefreshCw, Cpu } from 'lucide-react';
 
 interface Props {
   targetDate: string;
@@ -26,7 +25,6 @@ export default function TemporalWorkflowAction({ targetDate, mealPeriod, onPlanC
       setWorkflowInfo(res);
 
       if (res.temporal_active && res.workflow_id) {
-        // Poll status
         pollWorkflow(res.workflow_id);
       }
     } catch (err: any) {
@@ -58,71 +56,74 @@ export default function TemporalWorkflowAction({ targetDate, mealPeriod, onPlanC
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+    <div className="desk-card p-5 border-l-4 border-l-primary bg-surface-container-low/70">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-3">
         <div>
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-            <h3 className="text-sm font-bold text-white tracking-wide uppercase">
-              Temporal Distributed Workflow Orchestration
+            <Cpu className="w-4 h-4 text-primary" />
+            <h3 className="font-headline font-bold text-sm text-primary tracking-wide">
+              Temporal Distributed Workflow Orchestrator
             </h3>
+            <span className="font-mono text-[10px] bg-primary-container text-white px-1.5 py-0.5 rounded font-bold">
+              PIPELINE
+            </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Orchestrates context retrieval, baseline forecasting, SerpAPI pricing, Tiger Data snapshots, and Gemma recommendations.
+          <p className="font-body text-xs text-on-surface-variant mt-0.5">
+            Orchestrates context retrieval, deterministic baseline forecasting, SerpAPI supplier pricing, Tiger Data snapshots, and Gemma recommendations in a resilient workflow.
           </p>
         </div>
 
         <button
           onClick={handleStartWorkflow}
           disabled={loading}
-          className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-2 transition shadow-lg shadow-cyan-950/40"
+          className="btn-primary text-xs px-4 py-2 shrink-0 shadow-[0_2px_0_0_#00210a]"
         >
-          {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-          {loading ? 'Starting Workflow...' : 'Start Planning Workflow'}
+          {loading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
+          <span>{loading ? 'Starting Workflow...' : 'Run Planning Pipeline'}</span>
         </button>
       </div>
 
       {error && (
-        <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-300 flex items-center gap-2 mb-3">
-          <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+        <div className="p-3 bg-error-container border border-error/30 rounded-lg text-xs font-mono text-error flex items-center gap-2 mb-3">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {workflowInfo && (
-        <div className="mt-3 p-4 bg-slate-950 rounded-xl border border-slate-800 text-xs">
+        <div className="mt-3 p-4 bg-white rounded-xl border border-outline-variant/60 text-xs font-mono">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-slate-400">
+            <span className="text-on-surface-variant">
               Workflow ID:{' '}
-              <code className="text-cyan-300 bg-slate-900 px-1.5 py-0.5 rounded font-mono">
+              <code className="text-primary bg-surface-container px-1.5 py-0.5 rounded font-bold">
                 {workflowInfo.workflow_id}
               </code>
             </span>
             <span
-              className={`px-2 py-0.5 rounded text-[11px] font-semibold uppercase ${
+              className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase ${
                 workflowInfo.temporal_active
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                  : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                  ? 'bg-primary-fixed text-on-primary-fixed border border-primary/30'
+                  : 'bg-tertiary-fixed text-on-tertiary-fixed border border-tertiary-fixed/60'
               }`}
             >
               {pollStatus || (workflowInfo.temporal_active ? 'Running' : 'Direct Fallback')}
             </span>
           </div>
 
-          <p className="text-slate-400 text-[11px] mb-3">{workflowInfo.message}</p>
+          <p className="text-on-surface-variant text-[11px] mb-3">{workflowInfo.message}</p>
 
           {!workflowInfo.temporal_active && (
-            <div className="p-3 bg-slate-900/80 rounded-lg border border-slate-800 text-[11px] text-slate-400">
-              <div className="flex items-center gap-1.5 font-semibold text-slate-300 mb-1">
-                <Terminal className="w-3.5 h-3.5 text-cyan-400" />
-                <span>To run Temporal locally on Windows:</span>
+            <div className="p-3 bg-surface-container rounded-lg border border-outline-variant/40 text-[11px] text-on-surface-variant">
+              <div className="flex items-center gap-1.5 font-bold text-on-surface mb-1">
+                <Terminal className="w-3.5 h-3.5 text-primary" />
+                <span>To run Temporal server locally:</span>
               </div>
-              <pre className="bg-slate-950 p-2 rounded text-cyan-300 font-mono text-[10px] overflow-x-auto">
+              <pre className="bg-white p-2 rounded text-primary font-mono text-[10px] overflow-x-auto border border-outline-variant/30">
                 temporal server start-dev
               </pre>
-              <p className="mt-1 text-[10px] text-slate-500">
-                Then start the DabbaIQ worker:{' '}
-                <code className="text-slate-400">python -m app.temporal.worker</code>
+              <p className="mt-1 text-[10px] text-on-surface-variant">
+                Worker command:{' '}
+                <code className="text-primary font-bold">python -m app.temporal.worker</code>
               </p>
             </div>
           )}
@@ -137,9 +138,9 @@ export default function TemporalWorkflowAction({ targetDate, mealPeriod, onPlanC
               { step: '5. Gemma Grounding', desc: 'Validated menu advice' },
               { step: '6. Draft Persisted', desc: 'Idempotent save' },
             ].map((s, idx) => (
-              <div key={idx} className="p-2 bg-slate-900/50 rounded-lg border border-slate-800/80 text-[10px]">
-                <span className="font-semibold text-slate-300 block">{s.step}</span>
-                <span className="text-slate-500">{s.desc}</span>
+              <div key={idx} className="p-2 bg-surface-container-low rounded-lg border border-outline-variant/50 text-[10px]">
+                <span className="font-bold text-primary block">{s.step}</span>
+                <span className="text-on-surface-variant">{s.desc}</span>
               </div>
             ))}
           </div>

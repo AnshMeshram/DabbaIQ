@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useUIStore } from '@/lib/store';
 import { api, SupplierSearchResultItem } from '@/lib/api';
 import { supplierSearchRequestSchema } from '@/lib/validations';
-import { Search, ExternalLink, ShieldCheck, Check, AlertCircle, RefreshCw, X, Tag, Store } from 'lucide-react';
+import { Search, ExternalLink, ShieldCheck, AlertCircle, RefreshCw, X, Tag, Store } from 'lucide-react';
 
 export default function SupplierSearchModal() {
   const {
@@ -29,15 +29,7 @@ export default function SupplierSearchModal() {
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [confirmItem, setConfirmItem] = useState<SupplierSearchResultItem | null>(null);
 
-  // Sync active ingredient when opened
-  React.useEffect(() => {
-    if (activeSearchIngredient) {
-      setIngredientName(activeSearchIngredient);
-      handleSearch(activeSearchIngredient);
-    }
-  }, [activeSearchIngredient]);
-
-  const handleSearch = async (queryName?: string) => {
+  const handleSearch = useCallback(async (queryName?: string) => {
     const qName = queryName || ingredientName;
     if (!qName.trim()) return;
 
@@ -49,44 +41,55 @@ export default function SupplierSearchModal() {
       const parsed = supplierSearchRequestSchema.parse({
         ingredient_name: qName.trim(),
         package_quantity: packageQty ? parseFloat(packageQty) : undefined,
-        package_unit: packageQty ? packageUnit : undefined,
-        location: location.trim() || undefined,
+        package_unit: packageUnit || undefined,
+        location: location || undefined,
       });
 
       const res = await api.searchSuppliers(parsed);
+
       if (res.error) {
         setError(res.error);
-        setResults([]);
       } else {
         setResults(res.results || []);
-        setCached(res.cached || false);
-        setRetrievedAt(res.retrieved_at || new Date().toISOString());
+        setCached(res.cached);
+        setRetrievedAt(res.retrieved_at || null);
       }
     } catch (err: any) {
-      setError(err.message || 'Validation or search error');
+      setError(err.message || 'Error searching wholesale suppliers');
     } finally {
       setLoading(false);
     }
-  };
+  }, [ingredientName, packageQty, packageUnit, location]);
+
+  useEffect(() => {
+    if (activeSearchIngredient) {
+      setIngredientName(activeSearchIngredient);
+      handleSearch(activeSearchIngredient);
+    }
+  }, [activeSearchIngredient, handleSearch]);
 
   const handleSaveSnapshot = async (item: SupplierSearchResultItem) => {
     setSavingItem(item.title);
     setError(null);
+    setSaveSuccess(null);
+
     try {
-      await api.savePriceSnapshot({
-        ingredient_name: ingredientName,
+      const res = await api.savePriceSnapshot({
+        ingredient_name: ingredientName.toLowerCase(),
         source_name: item.source_name,
         product_title: item.title,
         price_numeric: item.price_numeric,
         currency: item.currency || 'INR',
         original_price_text: item.price_text,
         source_url: item.url,
-        query_text: `${ingredientName} supplier price`,
       });
-      setSaveSuccess(`Recorded price snapshot for "${item.title.slice(0, 30)}..." in Tiger Data!`);
+
+      setSaveSuccess(
+        `Recorded ₹${item.price_numeric || item.price_text} from ${item.source_name} to Tiger Data hypertable!`
+      );
       setConfirmItem(null);
     } catch (err: any) {
-      setError(err.message || 'Failed to save snapshot to Tiger Data');
+      setError(err.message || 'Failed to save price snapshot to Tiger Data');
     } finally {
       setSavingItem(null);
     }
@@ -95,27 +98,29 @@ export default function SupplierSearchModal() {
   if (!supplierModalOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto animate-in fade-in duration-150">
+      <div className="bg-white border-2 border-primary/30 rounded-2xl w-full max-w-4xl shadow-[0_8px_0_0_#18542a] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
-          <div className="flex items-center gap-2">
-            <Store className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-lg font-bold text-white">Find Suppliers & Live Market Prices</h2>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
-              Powered by SerpAPI
+        <div className="px-6 py-4 bg-primary text-white flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <Store className="w-5 h-5 text-tertiary-fixed" />
+            <h2 className="font-headline font-bold text-base sm:text-lg text-white">
+              Wholesale Market Prices &amp; Supplier Search
+            </h2>
+            <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-bold">
+              SERPAPI LIVE
             </span>
           </div>
           <button
             onClick={closeSupplierSearch}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+            className="text-white/80 hover:text-white p-1 rounded-lg"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Search controls */}
-        <div className="p-6 border-b border-slate-800 bg-slate-950/40">
+        <div className="p-5 border-b border-outline-variant/60 bg-surface-container-low">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -124,33 +129,39 @@ export default function SupplierSearchModal() {
             className="grid grid-cols-1 md:grid-cols-12 gap-3"
           >
             <div className="md:col-span-5">
-              <label className="block text-xs font-medium text-slate-400 mb-1">Ingredient Name</label>
+              <label className="block font-mono text-[11px] font-bold uppercase text-on-surface-variant mb-1">
+                Raw Ingredient
+              </label>
               <input
                 type="text"
                 value={ingredientName}
                 onChange={(e) => setIngredientName(e.target.value)}
-                placeholder="e.g. Toor Dal, Basmati Rice"
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+                placeholder="e.g. Toor Dal, Basmati Rice, Mustard Seeds"
+                className="w-full bg-white border border-outline-variant rounded-lg px-3 py-2 text-xs font-bold text-on-surface outline-none focus:border-primary"
                 required
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-slate-400 mb-1">Package Size</label>
+              <label className="block font-mono text-[11px] font-bold uppercase text-on-surface-variant mb-1">
+                Wholesale Size
+              </label>
               <input
                 type="number"
                 step="any"
                 value={packageQty}
                 onChange={(e) => setPackageQty(e.target.value)}
                 placeholder="e.g. 25"
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+                className="w-full bg-white border border-outline-variant rounded-lg px-3 py-2 text-xs font-mono font-bold text-on-surface outline-none focus:border-primary"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-slate-400 mb-1">Unit</label>
+              <label className="block font-mono text-[11px] font-bold uppercase text-on-surface-variant mb-1">
+                Unit
+              </label>
               <select
                 value={packageUnit}
                 onChange={(e) => setPackageUnit(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+                className="w-full bg-white border border-outline-variant rounded-lg px-3 py-2 text-xs font-mono font-bold text-on-surface outline-none focus:border-primary"
               >
                 <option value="kg">kg</option>
                 <option value="g">g</option>
@@ -163,29 +174,29 @@ export default function SupplierSearchModal() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-900/20 text-sm"
+                className="w-full btn-secondary text-xs font-mono"
               >
-                {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                {loading ? 'Searching...' : 'Search Prices'}
+                {loading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
+                <span>{loading ? 'Searching...' : 'Search Prices'}</span>
               </button>
             </div>
           </form>
 
           {/* Feedback messages */}
           {error && (
-            <div className="mt-3 p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg flex items-center gap-2 text-xs text-rose-300">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <div className="mt-3 p-3 bg-error-container border border-error/30 rounded-lg flex items-center gap-2 text-xs font-mono text-error">
+              <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
           {saveSuccess && (
-            <div className="mt-3 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center gap-2 text-xs text-emerald-300">
-              <ShieldCheck className="w-4 h-4 flex-shrink-0" />
+            <div className="mt-3 p-3 bg-primary-fixed/40 border border-primary/30 rounded-lg flex items-center gap-2 text-xs font-mono text-primary font-bold">
+              <ShieldCheck className="w-4 h-4 shrink-0 text-primary" />
               <span>{saveSuccess}</span>
             </div>
           )}
           {cached && (
-            <div className="mt-2 text-[11px] text-slate-500 flex items-center gap-1">
+            <div className="mt-2 font-mono text-[11px] text-on-surface-variant flex items-center gap-1">
               <span>Results served from local cache (retrieved at {retrievedAt ? new Date(retrievedAt).toLocaleTimeString() : 'recently'})</span>
             </div>
           )}
@@ -193,16 +204,16 @@ export default function SupplierSearchModal() {
 
         {/* Comparison tray if active */}
         {comparisonItems.length > 0 && (
-          <div className="px-6 py-3 bg-indigo-950/40 border-b border-indigo-800/40 flex items-center justify-between">
+          <div className="px-5 py-2.5 bg-tertiary-fixed/30 border-b border-tertiary-fixed/60 flex items-center justify-between font-mono text-xs">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-indigo-300">
-                Comparing {comparisonItems.length} selected item{comparisonItems.length > 1 ? 's' : ''}:
+              <span className="font-bold text-on-tertiary-fixed">
+                Comparing {comparisonItems.length} supplier offer{comparisonItems.length > 1 ? 's' : ''}:
               </span>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 flex-wrap">
                 {comparisonItems.map((c, idx) => (
                   <span
                     key={idx}
-                    className="text-xs bg-indigo-900/60 text-indigo-200 px-2 py-0.5 rounded border border-indigo-700/50 flex items-center gap-1"
+                    className="bg-white text-on-surface px-2 py-0.5 rounded border border-outline-variant/60 font-semibold"
                   >
                     {c.source_name}: {c.price_text || (c.price_numeric ? `₹${c.price_numeric}` : 'N/A')}
                   </span>
@@ -211,7 +222,7 @@ export default function SupplierSearchModal() {
             </div>
             <button
               onClick={clearComparison}
-              className="text-xs text-indigo-400 hover:text-indigo-200 underline"
+              className="text-secondary hover:underline font-bold text-xs"
             >
               Clear Comparison
             </button>
@@ -219,12 +230,12 @@ export default function SupplierSearchModal() {
         )}
 
         {/* Results list */}
-        <div className="p-6 overflow-y-auto space-y-3 flex-1">
+        <div className="p-5 overflow-y-auto space-y-3 flex-1 font-body text-xs">
           {results.length === 0 && !loading && (
-            <div className="text-center py-12 text-slate-500">
-              <Store className="w-12 h-12 mx-auto mb-3 opacity-40" />
-              <p className="text-sm">Enter an ingredient name and search to view live supplier offers.</p>
-              <p className="text-xs text-slate-600 mt-1">Live market data helps benchmark supplier quotes.</p>
+            <div className="text-center py-12 text-on-surface-variant space-y-2">
+              <Store className="w-10 h-10 mx-auto text-outline" />
+              <p className="font-semibold text-on-surface">Enter an ingredient name and search to query live wholesale supplier quotes.</p>
+              <p className="font-mono text-[11px] text-on-surface-variant">Live market data benchmarks procurement quotes against open suppliers.</p>
             </div>
           )}
 
@@ -234,51 +245,51 @@ export default function SupplierSearchModal() {
             return (
               <div
                 key={idx}
-                className={`p-4 rounded-xl border transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
+                className={`p-3.5 rounded-xl border transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
                   isCompared
-                    ? 'bg-indigo-950/20 border-indigo-600/50'
-                    : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
+                    ? 'bg-primary-fixed/20 border-primary shadow-xs'
+                    : 'bg-white border-outline-variant hover:border-primary/50'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   {item.thumbnail ? (
                     <img
                       src={item.thumbnail}
                       alt={item.title}
-                      className="w-12 h-12 object-cover rounded-lg bg-slate-800 border border-slate-700 flex-shrink-0"
+                      className="w-12 h-12 object-cover rounded-lg bg-surface-container border border-outline-variant/60 shrink-0"
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center flex-shrink-0">
-                      <Tag className="w-5 h-5 text-slate-500" />
+                    <div className="w-12 h-12 rounded-lg bg-surface-container border border-outline-variant/60 flex items-center justify-center shrink-0">
+                      <Tag className="w-5 h-5 text-outline" />
                     </div>
                   )}
 
-                  <div>
-                    <h4 className="text-sm font-semibold text-white line-clamp-1">{item.title}</h4>
-                    <div className="flex flex-wrap items-center gap-2 mt-1">
-                      <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                  <div className="min-w-0">
+                    <h4 className="font-headline font-bold text-sm text-on-surface line-clamp-1">{item.title}</h4>
+                    <div className="flex flex-wrap items-center gap-2 mt-1 font-mono text-[11px]">
+                      <span className="font-bold text-primary bg-primary-fixed/30 px-2 py-0.5 rounded border border-primary/20">
                         {item.source_name}
                       </span>
                       {item.price_text && (
-                        <span className="text-xs font-bold text-white bg-slate-800 px-2 py-0.5 rounded">
+                        <span className="font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded">
                           {item.price_text}
                         </span>
                       )}
                       {item.rating && (
-                        <span className="text-xs text-amber-400">★ {item.rating}</span>
+                        <span className="text-secondary font-bold">★ {item.rating}</span>
                       )}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end font-mono">
                   {/* Compare toggle */}
                   <button
                     onClick={() => toggleComparisonItem(item)}
-                    className={`text-xs px-2.5 py-1.5 rounded-lg border transition ${
+                    className={`text-xs px-2.5 py-1.5 rounded-lg border transition font-bold ${
                       isCompared
-                        ? 'bg-indigo-600 text-white border-indigo-500'
-                        : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-white text-on-surface border-outline-variant hover:bg-surface-container'
                     }`}
                   >
                     {isCompared ? '✓ Selected' : 'Compare'}
@@ -290,7 +301,7 @@ export default function SupplierSearchModal() {
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
+                      className="p-1.5 rounded-lg bg-white hover:bg-surface-container text-on-surface border border-outline-variant transition"
                       title="View supplier offer"
                     >
                       <ExternalLink className="w-4 h-4" />
@@ -300,7 +311,7 @@ export default function SupplierSearchModal() {
                   {/* Save to Tiger Data button */}
                   <button
                     onClick={() => setConfirmItem(item)}
-                    className="text-xs bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 transition font-medium"
+                    className="btn-surface text-xs font-mono font-bold"
                   >
                     Save Snapshot
                   </button>
@@ -312,23 +323,23 @@ export default function SupplierSearchModal() {
 
         {/* Confirmation Modal */}
         {confirmItem && (
-          <div className="p-4 bg-slate-950 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="text-xs text-slate-300">
-              <span className="font-semibold text-emerald-400">Confirm Price Snapshot:</span> Record observed price of{' '}
-              <strong className="text-white">{confirmItem.price_text || `₹${confirmItem.price_numeric}`}</strong> from{' '}
-              <span className="text-white">{confirmItem.source_name}</span> into Tiger Data hypertable?
+          <div className="p-4 bg-surface-container-low border-t border-outline-variant flex flex-col sm:flex-row items-center justify-between gap-3 font-mono text-xs">
+            <div className="text-on-surface">
+              <span className="font-bold text-primary">Confirm Price Snapshot: </span> Record observed price of{' '}
+              <strong className="text-secondary">{confirmItem.price_text || `₹${confirmItem.price_numeric}`}</strong> from{' '}
+              <span className="font-bold text-primary">{confirmItem.source_name}</span> into Tiger Data hypertable?
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmItem(null)}
-                className="px-3 py-1 text-xs text-slate-400 hover:text-white"
+                className="px-3 py-1 text-xs text-on-surface-variant hover:text-on-surface"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleSaveSnapshot(confirmItem)}
                 disabled={savingItem === confirmItem.title}
-                className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1 shadow"
+                className="btn-primary text-xs py-1 px-3 shadow-xs"
               >
                 {savingItem === confirmItem.title ? 'Saving...' : 'Confirm & Save'}
               </button>
@@ -337,9 +348,9 @@ export default function SupplierSearchModal() {
         )}
 
         {/* Footer Notice */}
-        <div className="px-6 py-3 bg-slate-950 border-t border-slate-800 text-[11px] text-slate-500 flex items-center justify-between">
-          <span>Supplier prices are benchmarks. Inventory unit costs are not updated without explicit confirmation.</span>
-          <span className="text-slate-600">DabbaIQ • Hacktoberfest 2026</span>
+        <div className="px-5 py-2.5 bg-surface-container-high border-t border-outline-variant/60 font-mono text-[11px] text-on-surface-variant flex items-center justify-between">
+          <span>Supplier prices are benchmarks. Inventory unit costs are not updated without explicit chef confirmation.</span>
+          <span className="text-primary font-bold">DabbaIQ • Inside the Dabba</span>
         </div>
       </div>
     </div>

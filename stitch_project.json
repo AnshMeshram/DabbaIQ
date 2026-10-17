@@ -1,0 +1,606 @@
+{
+  "success": true,
+  "data": {
+    "createTime": "2026-10-16T11:00:06.421765Z",
+    "designTheme": {
+      "bodyFont": "MANROPE",
+      "bodyFontFamily": "Manrope",
+      "colorMode": "LIGHT",
+      "colorVariant": "FIDELITY",
+      "customColor": "#18542a",
+      "designMd": "---\nname: Inside the Dabba / Modern Kitchen Desk\ncolors:\n  surface: '#fdf9f1'\n  surface-dim: '#dddad2'\n  surface-bright: '#fdf9f1'\n  surface-container-lowest: '#ffffff'\n  surface-container-low: '#f7f3eb'\n  surface-container: '#f1ede6'\n  surface-container-high: '#ece8e0'\n  surface-container-highest: '#e6e2da'\n  on-surface: '#1c1c17'\n  on-surface-variant: '#414940'\n  inverse-surface: '#31302b'\n  inverse-on-surface: '#f4f0e8'\n  outline: '#71796f'\n  outline-variant: '#c0c9bd'\n  surface-tint: '#306a3d'\n  primary: '#003c17'\n  on-primary: '#ffffff'\n  primary-container: '#18542a'\n  on-primary-container: '#8ac792'\n  inverse-primary: '#97d59f'\n  secondary: '#a73a00'\n  on-secondary: '#ffffff'\n  secondary-container: '#ff641a'\n  on-secondary-container: '#571a00'\n  tertiary: '#413000'\n  on-tertiary: '#ffffff'\n  tertiary-container: '#5c4600'\n  on-tertiary-container: '#e4b100'\n  error: '#ba1a1a'\n  on-error: '#ffffff'\n  error-container: '#ffdad6'\n  on-error-container: '#93000a'\n  primary-fixed: '#b2f2b9'\n  primary-fixed-dim: '#97d59f'\n  on-primary-fixed: '#00210a'\n  on-primary-fixed-variant: '#155128'\n  secondary-fixed: '#ffdbce'\n  secondary-fixed-dim: '#ffb599'\n  on-secondary-fixed: '#370e00'\n  on-secondary-fixed-variant: '#802a00'\n  tertiary-fixed: '#ffdf95'\n  tertiary-fixed-dim: '#f4bf18'\n  on-tertiary-fixed: '#251a00'\n  on-tertiary-fixed-variant: '#594400'\n  background: '#fdf9f1'\n  on-background: '#1c1c17'\n  surface-variant: '#e6e2da'\ntypography:\n  display-hero:\n    fontFamily: Epilogue\n    fontSize: 3.5rem\n    fontWeight: '700'\n    lineHeight: 4rem\n    letterSpacing: -0.02em\n  display-hero-mobile:\n    fontFamily: Epilogue\n    fontSize: 2.25rem\n    fontWeight: '700'\n    lineHeight: 2.75rem\n    letterSpacing: -0.01em\n  headline-lg:\n    fontFamily: Epilogue\n    fontSize: 2rem\n    fontWeight: '600'\n    lineHeight: 2.5rem\n    letterSpacing: -0.01em\n  headline-lg-mobile:\n    fontFamily: Epilogue\n    fontSize: 1.5rem\n    fontWeight: '600'\n    lineHeight: 2rem\n  headline-md:\n    fontFamily: Epilogue\n    fontSize: 1.25rem\n    fontWeight: '600'\n    lineHeight: 1.75rem\n  body-lg:\n    fontFamily: Manrope\n    fontSize: 1.125rem\n    fontWeight: '400'\n    lineHeight: 1.75rem\n  body-md:\n    fontFamily: Manrope\n    fontSize: 0.9375rem\n    fontWeight: '400'\n    lineHeight: 1.5rem\n  body-sm:\n    fontFamily: Manrope\n    fontSize: 0.8125rem\n    fontWeight: '400'\n    lineHeight: 1.25rem\n  label-mono:\n    fontFamily: JetBrains Mono\n    fontSize: 0.75rem\n    fontWeight: '500'\n    lineHeight: 1rem\n    letterSpacing: 0.06em\n  data-tabular:\n    fontFamily: Manrope\n    fontSize: 0.875rem\n    fontWeight: '600'\n    lineHeight: 1.25rem\n    letterSpacing: -0.01em\nrounded:\n  sm: 0.125rem\n  DEFAULT: 0.25rem\n  md: 0.375rem\n  lg: 0.5rem\n  xl: 0.75rem\n  full: 9999px\nspacing:\n  gutter: 1rem\n  gutter-tablet: 1.5rem\n  gutter-desktop: 2rem\n  margin: 1rem\n  margin-tablet: 2rem\n  margin-desktop: 3rem\n  space-xs: 0.25rem\n  space-sm: 0.5rem\n  space-md: 1rem\n  space-lg: 1.5rem\n  space-xl: 2.5rem\n---\n\n## Brand & Style\n\nThis design system embodies the tactile rigor, fragrant precision, and lived warmth of modern commercial food delivery and heritage dabba logistics. The aesthetic marries editorial publishing with the operational utility of a physical dispatch desk: ticket rails, pressed receipt ledgers, stacked stainless steel containers, and hand-annotated recipe batches. \n\nThe visual tone is deeply human, authoritative, and physical. Rather than retreating into sterile SaaS dashboards or synthetic neon interfaces, it grounds digital operations in the materiality of the kitchen: textured parchment tones, crisp stamp-like typography, rich forest green structural framing, and energetic spice-market accents. Interfaces must evoke confidence under operational pressure—clarity at a hurried glance, effortless density for high-throughput batching, and an artisanal respect for food craftsmanship.\n\n## Colors\n\nThe palette draws directly from kitchen staples, dry spices, and prep-table surfaces, balanced against grounding utility tones:\n\n- **Primary (`#18542A` — Forest Green):** The institutional backbone. Used for top-level navigation, structural framing, high-level ledger headers, and verified system states.\n- **Secondary (`#F96015` — Crisp Carrot):** The energetic operational driver. Reserved for primary calls-to-action, active dispatch dispatches, and pending kitchen actions.\n- **Tertiary (`#FFC926` — Sunshine):** Active order stages, prep-in-progress highlights, and focused attention markers.\n- **Alert & Wastage (`#D52518` — Tomato Burst):** Critical errors, food waste logging, margin erosion warnings, and time-overrun flags.\n- **Fresh Metrics (`#9ABC05` — Kiwi):** Margin targets met, fresh inventory verification, optimal prep health, and yield surplus.\n- **Backgrounds & Layers:** Primary canvas rests on Warm Off-white (`#FAF6EE`), with tiered cards and work surfaces utilizing tactile Cream (`#F3E8CC`). Structural dividers and ticket perforations use Muted Sand (`#E4D7B5`).\n- **Typography & Strokes:** High-contrast Charcoal (`#1F2421`) governs body copy, operational tables, and crisp borders, ensuring total legibility beneath bright kitchen task lighting.\n\n## Typography\n\nTypography balances editorial authority with clean industrial parsing. \n\nHeadlines use **Epilogue** for structured, rhythmic character that reflects editorial print and traditional culinary publications. Body prose and operational dashboards rely on **Manrope** for unyielding legibility, open counters, and robust tabular numeric balance when parsing high-density manifests, gram weights, and pricing columns. \n\n**JetBrains Mono** serves as the utility label and telemetry voice—applied to batch IDs, timestamps, bin numbers, and status stamps to evoke printed kitchen tickets and digital weight-scale readouts.\n\n## Layout & Spacing\n\nThe spatial model employs an editorial 12-column grid system for large desk displays and tablets, collapsing into a structured single-column stack on mobile devices. \n\n- **Density:** Kitchen operations demand dense, scannable data layouts. Gutters and vertical spacing remain compact (`space-sm` to `space-md`) within operational modules (KDS screens, batch sheets), expanding to broader editorial pauses (`space-lg` to `space-xl`) across executive overviews and supplier management.\n- **Reflow:** On mobile devices (under 768px), kitchen cards stretch horizontally to full bleed minus `margin` boundaries, switching data tables into stacked card ledgers. Desktop views balance master navigation rails on the left, an operational workspace in the center, and a persistent physical-tier dispatch sheet docked on the right.\n\n## Elevation & Depth\n\nThis system avoids synthetic blurs and floating colored halos. Spatial depth is achieved through tactile tiering, physical nesting metaphors, and crisp edge contrast:\n\n1. **Base Plate (Level 0):** Uncoated kitchen parchment (`#FAF6EE`).\n2. **Tiered Trays & Linens (Level 1):** Cream-toned structural panels (`#F3E8CC`) defined by a solid `1px` border in `#E4D7B5`. No ambient drop shadows; depth is communicated solely via tonal juxtaposition.\n3. **Stacked Slates (Level 2 - Modals, Ticket Drawers, Active Cards):** Elevated layers introduce a crisp, physical offset shadow: `0 4px 0 0 #E4D7B5` paired with a sharp hairline boundary (`1px solid #1F2421`).\n4. **Physical Separators:** Containers mimic stacked dabba tiers using horizontal segmented grooves (`2px` border lines rendered in alternating `#E4D7B5` and `#FFFFFF` highlights), creating a pressed, interlocking physical desk aesthetic.\n\n## Shapes\n\nShapes emulate trimmed paper stock, stamped meal tickets, and machined stainless edges. Corner radiuses remain tight (`0.25rem` for base elements, scaling to `0.5rem` for major container trays). Generous, bubbly corner radii are prohibited.\n\nTicket notches and receipt cuts (`clip-path` indentations) are encouraged on printable batch cards and order vouchers to reinforce physical dispatch metaphors.\n\n## Components\n\n### Buttons\n- **Primary Action (Crisp Carrot):** Solid `#F96015` fill, `#FFFFFF` text, `1px solid #1F2421` border, `rounded-sm` shape, subtle `0 2px 0 0 #1F2421` hard contact shadow. Pressed state translates `1px` down with zero shadow.\n- **Secondary (Forest Utility):** Solid `#18542A` fill, `#FAF6EE` text, `rounded-sm`.\n- **Tertiary / Work Surface:** Surface `#FAF6EE` fill, `#1F2421` text, `1px solid #E4D7B5` border.\n\n### Operational Chips & Telemetry Badges\n- Strict factual telemetry markers using `label-mono`:\n  - **Live:** Forest Green text (`#18542A`), `#FAF6EE` background, bounded by `1px solid #18542A` and a small solid green circular pip.\n  - **Estimations:** Sunshine Yellow background (`#FFC926`), `#1F2421` text.\n  - **Wastage / Alert:** Tomato Burst background (`#D52518`), `#FFFFFF` text.\n  - **Offline:** Neutral Charcoal outline (`#1F2421`) on `#E4D7B5` parchment fill.\n\n### Input Fields & Controls\n- Background in Warm Off-white (`#FAF6EE`), inset against Cream work panels.\n- Border is `1px solid #E4D7B5`, transitioning to `2px solid #18542A` on focus. No glowing aura.\n- Labels sit pinned directly to the upper border line in `label-mono` uppercase format.\n\n### Checkboxes & Segmented Toggles\n- Square forms (`rounded: 0.125rem`), high-contrast `#1F2421` stroke.\n- Checked state uses Forest Green (`#18542A`) fill with a crisp white physical tick mark.\n\n### Dabba Tier Cards & Receipt Slates\n- Card containers feature `#F3E8CC` surfaces, bordered by `#E4D7B5`.\n- Header bars mimic ticket clips: bounded with `#18542A` text against a faint linen texture, completed with mono-spaced item tallies and prep station IDs.\n- Tables within cards feature alternating row highlights using `#FAF6EE` and `#F3E8CC` with strict hairline dividers.",
+      "font": "EPILOGUE",
+      "headlineFont": "EPILOGUE",
+      "headlineFontFamily": "Epilogue",
+      "labelFont": "JETBRAINS_MONO",
+      "labelFontFamily": "JetBrains Mono",
+      "namedColors": {
+        "background": "#fdf9f1",
+        "error": "#ba1a1a",
+        "error_container": "#ffdad6",
+        "inverse_on_surface": "#f4f0e8",
+        "inverse_primary": "#97d59f",
+        "inverse_surface": "#31302b",
+        "on_background": "#1c1c17",
+        "on_error": "#ffffff",
+        "on_error_container": "#93000a",
+        "on_primary": "#ffffff",
+        "on_primary_container": "#8ac792",
+        "on_primary_fixed": "#00210a",
+        "on_primary_fixed_variant": "#155128",
+        "on_secondary": "#ffffff",
+        "on_secondary_container": "#571a00",
+        "on_secondary_fixed": "#370e00",
+        "on_secondary_fixed_variant": "#802a00",
+        "on_surface": "#1c1c17",
+        "on_surface_variant": "#414940",
+        "on_tertiary": "#ffffff",
+        "on_tertiary_container": "#e4b100",
+        "on_tertiary_fixed": "#251a00",
+        "on_tertiary_fixed_variant": "#594400",
+        "outline": "#71796f",
+        "outline_variant": "#c0c9bd",
+        "primary": "#003c17",
+        "primary_container": "#18542a",
+        "primary_fixed": "#b2f2b9",
+        "primary_fixed_dim": "#97d59f",
+        "secondary": "#a73a00",
+        "secondary_container": "#ff641a",
+        "secondary_fixed": "#ffdbce",
+        "secondary_fixed_dim": "#ffb599",
+        "surface": "#fdf9f1",
+        "surface_bright": "#fdf9f1",
+        "surface_container": "#f1ede6",
+        "surface_container_high": "#ece8e0",
+        "surface_container_highest": "#e6e2da",
+        "surface_container_low": "#f7f3eb",
+        "surface_container_lowest": "#ffffff",
+        "surface_dim": "#dddad2",
+        "surface_tint": "#306a3d",
+        "surface_variant": "#e6e2da",
+        "tertiary": "#413000",
+        "tertiary_container": "#5c4600",
+        "tertiary_fixed": "#ffdf95",
+        "tertiary_fixed_dim": "#f4bf18"
+      },
+      "overrideNeutralColor": "#faf6ee",
+      "overridePrimaryColor": "#18542a",
+      "overrideSecondaryColor": "#f96015",
+      "overrideTertiaryColor": "#ffc926",
+      "roundness": "ROUND_FOUR",
+      "spacing": {
+        "gutter": "1rem",
+        "gutter-desktop": "2rem",
+        "gutter-tablet": "1.5rem",
+        "margin": "1rem",
+        "margin-desktop": "3rem",
+        "margin-tablet": "2rem",
+        "space-lg": "1.5rem",
+        "space-md": "1rem",
+        "space-sm": "0.5rem",
+        "space-xl": "2.5rem",
+        "space-xs": "0.25rem"
+      },
+      "spacingScale": 2,
+      "typography": {
+        "body-lg": {
+          "fontFamily": "Manrope",
+          "fontSize": "1.125rem",
+          "fontWeight": "400",
+          "lineHeight": "1.75rem"
+        },
+        "body-md": {
+          "fontFamily": "Manrope",
+          "fontSize": "0.9375rem",
+          "fontWeight": "400",
+          "lineHeight": "1.5rem"
+        },
+        "body-sm": {
+          "fontFamily": "Manrope",
+          "fontSize": "0.8125rem",
+          "fontWeight": "400",
+          "lineHeight": "1.25rem"
+        },
+        "data-tabular": {
+          "fontFamily": "Manrope",
+          "fontSize": "0.875rem",
+          "fontWeight": "600",
+          "letterSpacing": "-0.01em",
+          "lineHeight": "1.25rem"
+        },
+        "display-hero": {
+          "fontFamily": "Epilogue",
+          "fontSize": "3.5rem",
+          "fontWeight": "700",
+          "letterSpacing": "-0.02em",
+          "lineHeight": "4rem"
+        },
+        "display-hero-mobile": {
+          "fontFamily": "Epilogue",
+          "fontSize": "2.25rem",
+          "fontWeight": "700",
+          "letterSpacing": "-0.01em",
+          "lineHeight": "2.75rem"
+        },
+        "headline-lg": {
+          "fontFamily": "Epilogue",
+          "fontSize": "2rem",
+          "fontWeight": "600",
+          "letterSpacing": "-0.01em",
+          "lineHeight": "2.5rem"
+        },
+        "headline-lg-mobile": {
+          "fontFamily": "Epilogue",
+          "fontSize": "1.5rem",
+          "fontWeight": "600",
+          "lineHeight": "2rem"
+        },
+        "headline-md": {
+          "fontFamily": "Epilogue",
+          "fontSize": "1.25rem",
+          "fontWeight": "600",
+          "lineHeight": "1.75rem"
+        },
+        "label-mono": {
+          "fontFamily": "JetBrains Mono",
+          "fontSize": "0.75rem",
+          "fontWeight": "500",
+          "letterSpacing": "0.06em",
+          "lineHeight": "1rem"
+        }
+      }
+    },
+    "deviceType": "DESKTOP",
+    "metadata": {
+      "userRole": "OWNER"
+    },
+    "name": "projects/1933848754259984407",
+    "origin": "STITCH",
+    "projectType": "TEXT_TO_UI_PRO",
+    "screenInstances": [
+      {
+        "height": 246,
+        "id": "0880bf18-6721-4c64-b0eb-eee2dc2ee4aa",
+        "label": "03-inventory-current.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198313607",
+        "type": "SCREEN_INSTANCE",
+        "width": 512,
+        "x": 1728
+      },
+      {
+        "height": 317,
+        "id": "0b97eed0-3eee-438e-85db-3242ac2ac461",
+        "label": "06-reports-current.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198310673",
+        "type": "SCREEN_INSTANCE",
+        "width": 512,
+        "x": 3456
+      },
+      {
+        "height": 404,
+        "id": "16f11754-87f1-4430-b755-ebb5d1f9543c",
+        "label": "Screenshot 2026-10-16 132917.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198312019",
+        "type": "SCREEN_INSTANCE",
+        "width": 512,
+        "x": 7488
+      },
+      {
+        "height": 1818,
+        "id": "22576da8e5654a12bebde9b6eed7b95d",
+        "label": "Inside the Dabba — Recipe Library",
+        "sourceScreen": "projects/1933848754259984407/screens/22576da8e5654a12bebde9b6eed7b95d",
+        "width": 1280,
+        "x": 4608,
+        "y": 8868
+      },
+      {
+        "height": 1883,
+        "id": "24fbaa3407634584b9a6ad7d611fedef",
+        "label": "DabbaIQ Operational Dashboard",
+        "sourceScreen": "projects/1933848754259984407/screens/24fbaa3407634584b9a6ad7d611fedef",
+        "width": 1280,
+        "y": 11585
+      },
+      {
+        "height": 1782,
+        "id": "26090fa455db48858394eb8345a545a0",
+        "label": "DabbaIQ Inventory & Stock",
+        "sourceScreen": "projects/1933848754259984407/screens/26090fa455db48858394eb8345a545a0",
+        "width": 1280,
+        "x": 2688,
+        "y": 11585
+      },
+      {
+        "height": 340,
+        "id": "270b493b-bbc8-46bb-967c-13ed3ffce394",
+        "label": "04-recipes-modal-current.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198312629",
+        "type": "SCREEN_INSTANCE",
+        "width": 512,
+        "x": 2304
+      },
+      {
+        "height": 1999,
+        "id": "27e0f6b927ed402ab8a28f54c52589c5",
+        "label": "DabbaIQ — Recipe Library & Recipe Costing",
+        "sourceScreen": "projects/1933848754259984407/screens/27e0f6b927ed402ab8a28f54c52589c5",
+        "width": 1280,
+        "y": 16176
+      },
+      {
+        "height": 1694,
+        "id": "296c310af1cc4fc3b1fcdcc18b31c047",
+        "label": "DabbaIQ Mobile — AI Preparation Planner",
+        "sourceScreen": "projects/1933848754259984407/screens/296c310af1cc4fc3b1fcdcc18b31c047",
+        "width": 390,
+        "x": 646,
+        "y": 13836
+      },
+      {
+        "height": 1242,
+        "id": "3175778b74274284ad803d9af9817ceb",
+        "label": "Inside the Dabba — Storyboard 01: Closed Stack",
+        "sourceScreen": "projects/1933848754259984407/screens/3175778b74274284ad803d9af9817ceb",
+        "width": 1280,
+        "x": 1728,
+        "y": 5044
+      },
+      {
+        "height": 1357,
+        "id": "32062f15acac4cb4b2c55fe6c3342af0",
+        "label": "Inside the Dabba — Storyboard 03: Upper Container Separating",
+        "sourceScreen": "projects/1933848754259984407/screens/32062f15acac4cb4b2c55fe6c3342af0",
+        "width": 1280,
+        "x": 4416,
+        "y": 5044
+      },
+      {
+        "height": 3771,
+        "id": "34e5259746564bdd87b271de1d09162f",
+        "label": "DabbaIQ — Privacy & Data Protection Policy",
+        "sourceScreen": "projects/1933848754259984407/screens/34e5259746564bdd87b271de1d09162f",
+        "width": 1280,
+        "x": 2688,
+        "y": 20620
+      },
+      {
+        "height": 382,
+        "id": "45eebfdac3564ded899557e0d6ff0803",
+        "label": "Top-down culinary photography of authentic Indian tiffin dishes arranged in bowls: rich yellow toor dal tadka with crackled mustard seeds and fresh curry leaves, fragrant long-grain steamed jeera basmati rice with cumin specks, warm golden whole-wheat phulkas brushed with pure desi ghee, and dry spiced aloo gobi adraki with fresh coriander. Warm cream background (#F3E8CC), soft morning light, editorial food magazine style, tactile ceramic and stainless steel serveware, rich authentic colors, no plastic, no artificial glow.",
+        "sourceScreen": "projects/1933848754259984407/screens/45eebfdac3564ded899557e0d6ff0803",
+        "width": 512,
+        "y": 8868
+      },
+      {
+        "height": 512,
+        "id": "4c3ec3a7caef4cc7b4946fe1cd8771d3",
+        "label": "Studio product photography of the exact same four-tier Indian stainless steel tiffin dabba carrier from {{DATA:IMAGE:IMAGE_7}}, State 3: The lid is lifted higher and the top container (Tier 04) is separating and lifting upwards, revealing a glimpse of warm folded phulkas / rotis inside. The lower two tiers remain resting on the base. Vertical mechanical disassembly progression. Same warm cream (#F3E8CC) studio backdrop, same camera angle, same brushed stainless steel material with forest green accents, soft contact shadows.",
+        "sourceScreen": "projects/1933848754259984407/screens/4c3ec3a7caef4cc7b4946fe1cd8771d3",
+        "width": 512,
+        "x": 576,
+        "y": 5044
+      },
+      {
+        "height": 1677,
+        "id": "4f9c41fc40b8421489fec7d702ac9f8a",
+        "label": "DabbaIQ AI Preparation Planner",
+        "sourceScreen": "projects/1933848754259984407/screens/4f9c41fc40b8421489fec7d702ac9f8a",
+        "width": 1280,
+        "x": 1344,
+        "y": 11585
+      },
+      {
+        "height": 2012,
+        "id": "5283dd1b33ac48fb9c0601626c2e86bc",
+        "label": "Inside the Dabba — Sales Log",
+        "sourceScreen": "projects/1933848754259984407/screens/5283dd1b33ac48fb9c0601626c2e86bc",
+        "width": 1280,
+        "x": 3264,
+        "y": 8868
+      },
+      {
+        "height": 1334,
+        "id": "595675e3143d4bc789a3f0fc42b4d207",
+        "label": "Inside the Dabba — Storyboard 04: Several Tiers Fully Separated",
+        "sourceScreen": "projects/1933848754259984407/screens/595675e3143d4bc789a3f0fc42b4d207",
+        "width": 1280,
+        "x": 5760,
+        "y": 5044
+      },
+      {
+        "height": 512,
+        "id": "5fc145315c9d4c4ea24d7b7293357ee6",
+        "label": "Studio product photography of an authentic four-tier Indian stainless steel tiffin dabba carrier (lunchbox), isolated on a soft warm cream (#F3E8CC) backdrop. Premium industrial design with deep forest green enamel handle and brass / sunshine yellow locking latches. Realistic brushed steel finish with subtle specular reflections, accurate metallic cylinders stacked vertically, gentle warm kitchen studio lighting, soft natural drop shadow. Commercial culinary design magazine style, hyper-detailed, clean tactile food craft aesthetic, no cartoon elements, no glowing lights.",
+        "sourceScreen": "projects/1933848754259984407/screens/5fc145315c9d4c4ea24d7b7293357ee6",
+        "width": 512,
+        "x": 11084
+      },
+      {
+        "height": 557,
+        "id": "609ef2e6-372c-44d9-a57e-fdd399cfeafd",
+        "label": "image.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198314159",
+        "type": "SCREEN_INSTANCE",
+        "width": 512,
+        "x": 8640
+      },
+      {
+        "height": 512,
+        "id": "6c00bd557c6346f88676c63fa2728ea3",
+        "label": "Studio product photography of the exact same four-tier Indian stainless steel tiffin dabba carrier from {{DATA:IMAGE:IMAGE_7}}, State 2: The brass locking latches are unclasped and the top lid with deep forest green handle is gently lifting upwards by a few inches, hovering just above the top stainless steel container. Warm steam wisps gently escaping. The lower three cylindrical tiers remain clamped. Consistent warm cream backdrop (#F3E8CC), same camera angle, realistic brushed steel reflections, soft natural drop shadow, premium culinary magazine style.",
+        "sourceScreen": "projects/1933848754259984407/screens/6c00bd557c6346f88676c63fa2728ea3",
+        "width": 512,
+        "y": 5044
+      },
+      {
+        "height": 512,
+        "id": "726129901b0c4e5bb211750708defa4c",
+        "label": "Studio product photography of the exact same four-tier Indian stainless steel tiffin dabba from {{DATA:IMAGE:IMAGE_7}} and {{DATA:IMAGE:IMAGE_6}}, State 4: All four cylindrical tiers and top lid are now vertically separated and floating with generous spacing in mid-air in a clean mechanical exploded view. From top to bottom: lid with green handle, top tier with folded rotis, middle tier with yellow toor dal tadka, second tier with fragrant basmati jeera rice, bottom container. Same warm cream (#F3E8CC) backdrop, same camera perspective, realistic brushed steel reflections, editorial culinary lighting.",
+        "sourceScreen": "projects/1933848754259984407/screens/726129901b0c4e5bb211750708defa4c",
+        "width": 512,
+        "x": 1152,
+        "y": 5044
+      },
+      {
+        "height": 1282,
+        "id": "72d612ba4e8a41f78c7267d76e2618e5",
+        "label": "Inside the Dabba — Storyboard 06: Complete Kitchen System",
+        "sourceScreen": "projects/1933848754259984407/screens/72d612ba4e8a41f78c7267d76e2618e5",
+        "width": 1280,
+        "x": 8448,
+        "y": 5044
+      },
+      {
+        "height": 2094,
+        "id": "748291c6553945c2af153185ddc24bd9",
+        "label": "DabbaIQ — Settings & System Health",
+        "sourceScreen": "projects/1933848754259984407/screens/748291c6553945c2af153185ddc24bd9",
+        "width": 1280,
+        "x": 1344,
+        "y": 20620
+      },
+      {
+        "height": 128,
+        "id": "7b11b0f76e044152a703866548af02c8",
+        "label": "DabbaIQ Brand Logo",
+        "sourceScreen": "projects/1933848754259984407/screens/7b11b0f76e044152a703866548af02c8",
+        "width": 128,
+        "y": 13836
+      },
+      {
+        "height": 404,
+        "id": "7bcb4b1e-5cab-4f7f-b41d-499be8eca191",
+        "label": "08-dashboard-current.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198312813",
+        "type": "SCREEN_INSTANCE",
+        "width": 512,
+        "x": 4608
+      },
+      {
+        "height": 412,
+        "id": "8dff6574-07bb-4b88-a507-fcc97f3e15cd",
+        "label": "09-supplier-modal-current.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198313975",
+        "type": "SCREEN_INSTANCE",
+        "width": 512,
+        "x": 6336
+      },
+      {
+        "height": 375,
+        "id": "90574e56-1547-4337-9e16-a803e80b1ac4",
+        "label": "07-settings-current.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198313791",
+        "type": "SCREEN_INSTANCE",
+        "width": 512,
+        "x": 4032
+      },
+      {
+        "height": 1899,
+        "id": "96503c2f086940668c19ff94b6ec82e4",
+        "label": "DabbaIQ — Waste Tracker & Food Loss Intelligence",
+        "sourceScreen": "projects/1933848754259984407/screens/96503c2f086940668c19ff94b6ec82e4",
+        "width": 1280,
+        "y": 18461
+      },
+      {
+        "height": 328,
+        "id": "a6994fe7-d6e5-4573-a539-5611558c3ff6",
+        "label": "05-waste-current.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198311651",
+        "type": "SCREEN_INSTANCE",
+        "width": 512,
+        "x": 2880
+      },
+      {
+        "height": 2084,
+        "id": "adcae1e6e17b47d5b78d1c16bc62b9a5",
+        "label": "DabbaIQ Mobile — Kitchen Dashboard",
+        "sourceScreen": "projects/1933848754259984407/screens/adcae1e6e17b47d5b78d1c16bc62b9a5",
+        "width": 390,
+        "x": 192,
+        "y": 13836
+      },
+      {
+        "height": 540,
+        "id": "assets_7a75cdb67d6f4f4187ae6b76e3c04659",
+        "sourceAsset": "assets/7a75cdb67d6f4f4187ae6b76e3c04659",
+        "type": "DESIGN_SYSTEM_INSTANCE",
+        "width": 960,
+        "x": 10060
+      },
+      {
+        "height": 3172,
+        "id": "b32ed781948044e9a50efb6f62f58866",
+        "label": "Inside the Dabba — Experience",
+        "sourceScreen": "projects/1933848754259984407/screens/b32ed781948044e9a50efb6f62f58866",
+        "width": 1280,
+        "x": 12236
+      },
+      {
+        "height": 37,
+        "id": "b40e5991-89f4-4771-b697-5ee8916c42bc",
+        "label": "Screenshot 2026-10-16 133255.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198311041",
+        "type": "SCREEN_INSTANCE",
+        "width": 512,
+        "x": 8064
+      },
+      {
+        "height": 37,
+        "id": "b89d71f1-4902-40ba-85ba-4ac6868d019c",
+        "label": "09-footer-current.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198310857",
+        "type": "SCREEN_INSTANCE",
+        "width": 512,
+        "x": 5760
+      },
+      {
+        "height": 1359,
+        "id": "b8cd18c6eec347bf9f9927610b857f77",
+        "label": "Inside the Dabba — Storyboard 05: Feature Architecture",
+        "sourceScreen": "projects/1933848754259984407/screens/b8cd18c6eec347bf9f9927610b857f77",
+        "width": 1280,
+        "x": 7104,
+        "y": 5044
+      },
+      {
+        "height": 202,
+        "id": "c006b4d0-a79e-4dff-b22d-c9b5cbd132e4",
+        "label": "02-sales-current.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198310489",
+        "type": "SCREEN_INSTANCE",
+        "width": 512,
+        "x": 1152
+      },
+      {
+        "height": 512,
+        "id": "c29621207e774fcb97b9aa637dced83b",
+        "label": "Studio product photography of the same authentic Indian stainless steel tiffin dabba, shown disassembled and opened tier-by-tier in an elegant vertical exploded view: top lid lifted showing sunshine yellow interior rim, middle tier floating revealing fragrant basmati jeera rice, next tier revealing yellow toor dal tadka with curry leaves and mustard seeds, bottom tier with warm soft whole-wheat rotis neatly folded. Brushed metal reflections, clean warm cream (#F3E8CC) studio backdrop, appetizing culinary editorial style, sharp tactile focus, no cartoon or AI glow.",
+        "sourceScreen": "projects/1933848754259984407/screens/c29621207e774fcb97b9aa637dced83b",
+        "width": 512,
+        "x": 11660
+      },
+      {
+        "height": 314,
+        "id": "c378e91e-738a-4208-bd59-de4f04165a75",
+        "label": "01-planner-current.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198311467",
+        "type": "SCREEN_INSTANCE",
+        "width": 512,
+        "x": 576
+      },
+      {
+        "height": 2459,
+        "id": "c40c8e79fa3b4799a6bd83d5d57732e9",
+        "label": "Inside the Dabba — Inventory & Stock",
+        "sourceScreen": "projects/1933848754259984407/screens/c40c8e79fa3b4799a6bd83d5d57732e9",
+        "width": 1280,
+        "x": 576,
+        "y": 8868
+      },
+      {
+        "height": 1403,
+        "id": "c9fdd2e3c79c42a7bcea3108c6cbf8cc",
+        "label": "Inside the Dabba — Storyboard 02: Lid Lifting",
+        "sourceScreen": "projects/1933848754259984407/screens/c9fdd2e3c79c42a7bcea3108c6cbf8cc",
+        "width": 1280,
+        "x": 3072,
+        "y": 5044
+      },
+      {
+        "height": 404,
+        "id": "cb21a0b0-a361-45da-a5dd-1616224c71db",
+        "label": "00-dashboard-current.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198312445",
+        "type": "SCREEN_INSTANCE",
+        "width": 512
+      },
+      {
+        "height": 4089,
+        "id": "d87b787d49364a8aacc4a7534ef8f284",
+        "label": "DabbaIQ — Terms of Service & Operational License",
+        "sourceScreen": "projects/1933848754259984407/screens/d87b787d49364a8aacc4a7534ef8f284",
+        "width": 1280,
+        "x": 4032,
+        "y": 20620
+      },
+      {
+        "height": 412,
+        "id": "d94eaf99-4ee4-4273-85a4-7f82aadb034a",
+        "label": "10-supplier-modal-current.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198312997",
+        "type": "SCREEN_INSTANCE",
+        "width": 512,
+        "x": 6912
+      },
+      {
+        "height": 1768,
+        "id": "dad0b465-74b5-4a6b-a972-f42806bf0850",
+        "label": "DabbaIQ-STITCH-DESIGN-PROMPT.md",
+        "sourceScreen": "projects/1933848754259984407/screens/13917941343828778195",
+        "type": "SCREEN_INSTANCE",
+        "width": 780,
+        "x": 9216
+      },
+      {
+        "height": 1938,
+        "id": "db3f41088ed9411fac9c081e984f796e",
+        "label": "DabbaIQ Sales Log",
+        "sourceScreen": "projects/1933848754259984407/screens/db3f41088ed9411fac9c081e984f796e",
+        "width": 1280,
+        "x": 4032,
+        "y": 11585
+      },
+      {
+        "height": 2232,
+        "id": "ed7133b37d254222b716574fbf39f22d",
+        "label": "Inside the Dabba — Waste Tracker",
+        "sourceScreen": "projects/1933848754259984407/screens/ed7133b37d254222b716574fbf39f22d",
+        "width": 1280,
+        "x": 1920,
+        "y": 8868
+      },
+      {
+        "height": 1376,
+        "id": "f069e818f817440b965722d7f6a4b92c",
+        "label": "Inside the Dabba — Cover",
+        "sourceScreen": "projects/1933848754259984407/screens/f069e818f817440b965722d7f6a4b92c",
+        "width": 1280,
+        "y": 3412
+      },
+      {
+        "height": 2135,
+        "id": "f389b60feb8d4975886e82f6b4f29546",
+        "label": "DabbaIQ — Business & Operations Reports",
+        "sourceScreen": "projects/1933848754259984407/screens/f389b60feb8d4975886e82f6b4f29546",
+        "width": 1280,
+        "y": 20620
+      },
+      {
+        "height": 1888,
+        "id": "f4513a8d28d74149a8c15a757a6b8d03",
+        "label": "Inside the Dabba — Phase 03: AI Preparation Planner",
+        "sourceScreen": "projects/1933848754259984407/screens/f4513a8d28d74149a8c15a757a6b8d03",
+        "width": 1280,
+        "y": 6723
+      },
+      {
+        "height": 37,
+        "id": "fce7f619-51c3-4c67-8c23-44aa87139662",
+        "label": "08-footer-current.png",
+        "sourceScreen": "projects/1933848754259984407/screens/8476018623198311835",
+        "type": "SCREEN_INSTANCE",
+        "width": 512,
+        "x": 5184
+      }
+    ],
+    "thumbnailScreenshot": {
+      "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1WSlz3YIJ5P5q4vkjVsgt-OlHsNtjeB-C3Z02FZszZGhckfHhQjzaDCmzCjOezItcgY1jH750YtS-pbcA1D1c-ji0d_XLKbrJtkBDMEeD8Zubcp0Nha_4Bw7RmUziTmzwYIeLsqyoUH0Ea-sKsqJwFfH-AL8hzff5Ywe3HLi7VdI_xg2uUxQTCQFgULrMJj6Ld_ZK2Qww1WKMNptC-99MpXoANt-Zp8GH2OBlVcpCo4NslpPRaLbV4OG6s",
+      "name": "projects/1933848754259984407/screens/c29621207e774fcb97b9aa637dced83b/fileEntries/screenshot"
+    },
+    "title": "DabbaIQ: Inside The Dabba",
+    "updateTime": "2026-10-17T05:52:42.461525Z",
+    "visibility": "PUBLIC"
+  }
+}

@@ -1,26 +1,38 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   BookOpen,
   Plus,
   Trash2,
   Edit2,
   X,
-  IndianRupee,
   AlertCircle,
-  Tag,
   Clock,
   Sparkles,
+  Layers,
+  ChefHat,
+  RefreshCw,
+  CheckCircle2,
+  Tag,
+  Languages,
 } from 'lucide-react';
 import { api, Recipe, Ingredient, RecipeIngredient } from '@/lib/api';
 
-const MEAL_CATEGORIES = ['main', 'side', 'bread', 'rice', 'dessert', 'beverage', 'snack'];
-const UNITS = ['kg', 'g', 'L', 'ml', 'pieces'];
+const MEAL_CATEGORIES = [
+  { id: 'all', label: 'All Dishes' },
+  { id: 'main', label: 'Main Curry' },
+  { id: 'side', label: 'Dal & Kadhi' },
+  { id: 'bread', label: 'Breads & Phulkas' },
+  { id: 'rice', label: 'Rice & Biryani' },
+  { id: 'dessert', label: 'Dessert' },
+  { id: 'snack', label: 'Sides & Snacks' },
+];
 
 export default function RecipesPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,11 +52,14 @@ export default function RecipesPage() {
   const [generatedDesc, setGeneratedDesc] = useState('');
   const [generatingDesc, setGeneratingDesc] = useState(false);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [rRes, iRes] = await Promise.all([api.getRecipes(), api.getInventory()]);
+      const [rRes, iRes] = await Promise.all([
+        api.getRecipes(selectedCategory !== 'all' ? selectedCategory : undefined),
+        api.getInventory(),
+      ]);
       setRecipes(rRes.items);
       setIngredients(iRes.items);
     } catch (err: any) {
@@ -52,11 +67,11 @@ export default function RecipesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const handleOpenAdd = () => {
     setEditingRecipe(null);
@@ -64,7 +79,6 @@ export default function RecipesPage() {
     setMealCategory('main');
     setPrepNotes('');
     setDietaryLabels('vegetarian');
-    // Start with one blank ingredient
     if (ingredients.length > 0) {
       setRecipeIngredients([
         {
@@ -126,6 +140,14 @@ export default function RecipesPage() {
     setRecipeIngredients(recipeIngredients.filter((_, i) => i !== index));
   };
 
+  // Live portion cost calculator for form preview
+  const liveFormPortionCost = recipeIngredients.reduce((total, row) => {
+    const ing = ingredients.find((i) => i.id === row.ingredient_id);
+    const unitCost = ing ? ing.cost_per_unit : 0;
+    const qty = parseFloat(row.quantity_per_portion.toString()) || 0;
+    return total + unitCost * qty;
+  }, 0);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -181,7 +203,7 @@ export default function RecipesPage() {
       const res = await api.generateMenuDescription([recipe.id], aiLang);
       setGeneratedDesc(res.description);
     } catch (err: any) {
-      setGeneratedDesc(`AI Description unavailable: ${err.message}`);
+      setGeneratedDesc(`AI Generation notice: ${err.message}`);
     } finally {
       setGeneratingDesc(false);
     }
@@ -189,321 +211,425 @@ export default function RecipesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E7E5E4]">
+      {/* Page Title & Operational Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-outline-variant/60">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#0F291E]">Recipe Library</h1>
-          <p className="text-sm text-[#78716C]">
-            Deterministic per-portion ingredient costs calculated automatically from stock prices
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-headline font-bold text-primary tracking-tight">
+              Recipe Library &amp; Costing Matrix
+            </h1>
+            <span className="font-mono text-xs px-2 py-0.5 rounded-xs bg-primary text-white font-bold">
+              BOM MATRIX
+            </span>
+          </div>
+          <p className="font-body text-xs sm:text-sm text-on-surface-variant mt-0.5">
+            Bill of Materials (BOM), per-portion ingredient allocations, and Gemma AI menu storytelling
           </p>
         </div>
 
         <button
           onClick={handleOpenAdd}
-          className="btn-forest px-4 py-2 text-xs font-semibold flex items-center gap-1.5 shadow-xs self-start sm:self-auto"
+          className="btn-primary text-xs shadow-[0_2px_0_0_#00210a] self-start sm:self-auto"
         >
-          <Plus className="w-4 h-4" />
-          Create Recipe
+          <Plus className="w-3.5 h-3.5" />
+          <span>Add Master Recipe</span>
         </button>
       </div>
 
-      {error && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {/* Recipe Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {recipes.map((recipe) => (
-          <div key={recipe.id} className="card-warm p-5 flex flex-col justify-between">
-            <div>
-              {/* Header */}
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div>
-                  <h3 className="font-bold text-base text-[#0F291E] flex items-center gap-1.5">
-                    {recipe.name}
-                    {recipe.is_demo && <span className="badge-demo scale-90">Demo</span>}
-                  </h3>
-                  <span className="text-[11px] font-semibold uppercase text-stone-500 bg-stone-100 px-2 py-0.5 rounded">
-                    {recipe.meal_category}
-                  </span>
-                </div>
-
-                <div className="text-right">
-                  <div className="text-xs text-[#78716C]">Cost / Portion</div>
-                  <div className="text-base font-bold text-[#1B4332] font-mono">
-                    ₹{recipe.estimated_cost_per_portion}
-                  </div>
-                </div>
-              </div>
-
-              {/* Dietary Labels */}
-              {recipe.dietary_labels && recipe.dietary_labels.length > 0 && (
-                <div className="flex flex-wrap gap-1 my-2">
-                  {recipe.dietary_labels.map((label, idx) => (
-                    <span
-                      key={idx}
-                      className="text-[10px] font-medium bg-[#EBF8EE] text-[#1B4332] px-1.5 py-0.5 rounded border border-[#D8F3DC]"
-                    >
-                      {label}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Ingredients List */}
-              <div className="mt-3 pt-3 border-t border-[#E7E5E4]">
-                <div className="text-[11px] font-semibold text-[#57534E] mb-1.5 uppercase tracking-wider">
-                  Ingredients per Portion:
-                </div>
-                <div className="space-y-1 max-h-36 overflow-y-auto pr-1">
-                  {recipe.ingredients.map((ing, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between text-xs py-0.5 text-stone-700"
-                    >
-                      <span className="capitalize">{ing.ingredient_name || 'Ingredient'}</span>
-                      <span className="font-mono text-stone-500">
-                        {ing.quantity_per_portion} {ing.unit}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Prep Notes */}
-              {recipe.prep_notes && (
-                <div className="mt-3 p-2 bg-[#FBF9F5] rounded-lg border border-[#E7E5E4] text-[11px] text-[#57534E]">
-                  <strong>Prep notes:</strong> {recipe.prep_notes}
-                </div>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div className="mt-4 pt-3 border-t border-[#E7E5E4] flex items-center justify-between text-xs">
-              <button
-                onClick={() => handleGenerateDescription(recipe)}
-                className="text-[#D97706] hover:text-[#B45309] font-semibold flex items-center gap-1"
-                title="Generate marketing menu description using Gemma"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                AI Description
-              </button>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleOpenEdit(recipe)}
-                  className="p-1 hover:text-stone-900 text-stone-500 rounded"
-                  title="Edit"
-                >
-                  <Edit2 className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => handleDelete(recipe.id, recipe.name)}
-                  className="p-1 hover:text-red-700 text-stone-400 rounded"
-                  title="Delete"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          </div>
+      {/* Category Navigation Bar */}
+      <div className="desk-card p-3 flex items-center gap-1.5 overflow-x-auto font-mono text-xs">
+        {MEAL_CATEGORIES.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => setSelectedCategory(cat.id)}
+            className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition ${
+              selectedCategory === cat.id
+                ? 'bg-primary-container text-white font-bold shadow-[0_1px_2px_rgba(0,0,0,0.06)]'
+                : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface border border-outline-variant/40'
+            }`}
+          >
+            {cat.label}
+          </button>
         ))}
-
-        {recipes.length === 0 && (
-          <div className="col-span-full py-16 text-center text-[#A8A29E] card-warm">
-            {loading ? 'Loading recipe library...' : 'No recipes created yet.'}
-          </div>
-        )}
       </div>
 
-      {/* AI Menu Description Modal */}
+      {/* Error Alert */}
+      {error && (
+        <div className="p-4 rounded-xl bg-error-container border border-error/30 text-error text-xs font-mono flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+          <button onClick={() => setError(null)} className="font-bold">✕</button>
+        </div>
+      )}
+
+      {/* Recipes Grid */}
+      {loading ? (
+        <div className="desk-card p-12 text-center font-mono text-xs text-on-surface-variant">
+          <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
+          Loading Bill of Materials &amp; Recipes...
+        </div>
+      ) : recipes.length === 0 ? (
+        <div className="desk-card p-12 text-center font-body text-xs text-on-surface-variant space-y-3">
+          <BookOpen className="w-8 h-8 mx-auto text-outline" />
+          <p className="font-semibold text-on-surface">No recipes found in this category.</p>
+          <button onClick={handleOpenAdd} className="btn-secondary text-xs">
+            + Create First Recipe
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {recipes.map((recipe) => (
+            <div
+              key={recipe.id}
+              className="desk-card p-5 flex flex-col justify-between hover:border-primary/50 transition-colors"
+            >
+              <div>
+                {/* Recipe Header */}
+                <div className="flex items-start justify-between gap-3 border-b border-outline-variant/40 pb-3 mb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-headline font-bold text-lg text-primary">
+                        {recipe.name}
+                      </h3>
+                      <span className="font-mono text-[10px] uppercase font-bold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">
+                        {recipe.meal_category}
+                      </span>
+                    </div>
+
+                    {/* Dietary Badges */}
+                    <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                      {recipe.dietary_labels?.map((label, idx) => (
+                        <span
+                          key={idx}
+                          className="font-mono text-[10px] text-primary bg-primary-fixed/30 px-2 py-0.5 rounded font-semibold border border-primary/20"
+                        >
+                          {label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Portion Cost Highlight */}
+                  <div className="text-right shrink-0">
+                    <span className="font-mono text-[10px] uppercase font-bold text-on-surface-variant block">
+                      Cost / Dabba
+                    </span>
+                    <span className="font-headline font-bold text-xl text-primary">
+                      ₹{Math.round(recipe.estimated_cost_per_portion)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Bill of Materials (BOM) Table */}
+                <div className="mb-4">
+                  <div className="font-mono text-[11px] font-bold text-on-surface-variant uppercase mb-1.5 flex items-center justify-between">
+                    <span>Ingredient Allocation (per portion)</span>
+                    <span>{recipe.ingredients.length} items</span>
+                  </div>
+
+                  <div className="bg-surface-container-low rounded-lg p-2.5 border border-outline-variant/40">
+                    <div className="divide-y divide-outline-variant/40 font-mono text-xs">
+                      {recipe.ingredients.map((ing, i) => (
+                        <div key={i} className="py-1.5 flex items-center justify-between">
+                          <span className="font-body text-on-surface font-medium capitalize">
+                            {ing.ingredient_name || ing.ingredient_id}
+                          </span>
+                          <span className="font-bold text-primary">
+                            {ing.quantity_per_portion} {ing.unit}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Prep Notes */}
+                {recipe.prep_notes && (
+                  <div className="mb-4 p-2.5 bg-surface-container rounded-lg border border-outline-variant/40 text-xs font-mono text-on-surface-variant">
+                    <span className="font-bold text-primary">Station Prep Notes: </span>
+                    {recipe.prep_notes}
+                  </div>
+                )}
+              </div>
+
+              {/* Recipe Card Action Footer */}
+              <div className="pt-3 border-t border-outline-variant/40 flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleGenerateDescription(recipe)}
+                  className="font-mono text-[11px] font-bold text-secondary bg-secondary-fixed/40 hover:bg-secondary-fixed/70 border border-secondary/30 px-2.5 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-secondary" />
+                  <span>AI Menu Story</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleOpenEdit(recipe)}
+                    className="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition"
+                    title="Edit Recipe"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(recipe.id, recipe.name)}
+                    className="p-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-surface-container transition"
+                    title="Delete Recipe"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* AI Menu Storyteller Modal (Gemma 2 Inference) */}
       {descModalRecipe && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[#E7E5E4]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white border-2 border-primary/30 rounded-xl shadow-[0_8px_0_0_#18542a] w-full max-w-lg overflow-hidden">
+            <div className="bg-primary px-5 py-4 text-white flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#D97706]" />
-                <h3 className="font-bold text-base text-[#0F291E]">
-                  AI Menu Description — {descModalRecipe.name}
+                <Sparkles className="w-5 h-5 text-tertiary-fixed" />
+                <h3 className="font-headline font-bold text-base tracking-tight">
+                  Gemma AI Menu Storyteller
                 </h3>
               </div>
-              <button onClick={() => setDescModalRecipe(null)} className="text-stone-400 hover:text-stone-700">
+              <button
+                onClick={() => setDescModalRecipe(null)}
+                className="text-white/80 hover:text-white p-1"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="flex items-center gap-2 text-xs">
-              <span className="font-semibold text-stone-700">Language:</span>
-              {['English', 'Hindi', 'Marathi'].map((lang) => (
+            <div className="p-5 space-y-4 font-body text-xs">
+              <div className="flex items-center justify-between bg-surface-container p-2.5 rounded-lg font-mono">
+                <div>
+                  <span className="text-on-surface-variant">Selected Dish: </span>
+                  <strong className="text-primary">{descModalRecipe.name}</strong>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Languages className="w-3.5 h-3.5 text-primary" />
+                  <select
+                    value={aiLang}
+                    onChange={(e) => {
+                      setAiLang(e.target.value);
+                      handleGenerateDescription(descModalRecipe);
+                    }}
+                    className="bg-white border border-outline-variant rounded px-2 py-0.5 text-xs font-bold text-primary outline-none"
+                  >
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi (हिंदी)</option>
+                    <option value="Marathi">Marathi (मराठी)</option>
+                    <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="p-4 bg-surface-container-low rounded-xl border border-outline-variant/60 min-h-28 flex items-center justify-center">
+                {generatingDesc ? (
+                  <div className="text-center font-mono text-on-surface-variant space-y-2">
+                    <RefreshCw className="w-5 h-5 animate-spin mx-auto text-primary" />
+                    <span>Gemma generating culinary story &amp; promotional description...</span>
+                  </div>
+                ) : (
+                  <p className="font-body text-sm text-on-surface leading-relaxed">
+                    {generatedDesc || 'Click refresh to synthesize a fresh story.'}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
                 <button
-                  key={lang}
-                  onClick={() => {
-                    setAiLang(lang);
-                    handleGenerateDescription(descModalRecipe);
-                  }}
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium transition ${
-                    aiLang === lang ? 'bg-[#1B4332] text-white' : 'bg-stone-100 text-stone-700'
-                  }`}
+                  type="button"
+                  onClick={() => handleGenerateDescription(descModalRecipe)}
+                  disabled={generatingDesc}
+                  className="btn-surface text-xs font-mono"
                 >
-                  {lang}
+                  Regenerate
                 </button>
-              ))}
-            </div>
-
-            <div className="bg-[#FBF9F5] p-4 rounded-xl border border-[#E7E5E4] min-h-24 text-xs text-stone-800 leading-relaxed">
-              {generatingDesc ? (
-                <div className="text-stone-400 italic">Generating appetizing description with Gemma...</div>
-              ) : (
-                generatedDesc || 'Click a language above to generate.'
-              )}
-            </div>
-
-            <div className="flex justify-end">
-              <button onClick={() => setDescModalRecipe(null)} className="btn-outline px-4 py-1.5 text-xs">
-                Close
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setDescModalRecipe(null)}
+                  className="btn-primary text-xs"
+                >
+                  Done
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Create / Edit Recipe Modal */}
+      {/* Add / Edit Recipe Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-2 border-b border-[#E7E5E4]">
-              <h3 className="font-bold text-base text-[#0F291E]">
-                {editingRecipe ? 'Edit Recipe' : 'Create New Recipe'}
-              </h3>
-              <button onClick={() => setShowModal(false)} className="text-stone-400 hover:text-stone-700">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
+          <div className="bg-white border-2 border-primary/30 rounded-xl shadow-[0_8px_0_0_#18542a] w-full max-w-2xl my-8 overflow-hidden">
+            <div className="bg-primary px-5 py-4 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ChefHat className="w-5 h-5 text-tertiary-fixed" />
+                <h3 className="font-headline font-bold text-base tracking-tight">
+                  {editingRecipe ? 'Edit Master Recipe' : 'Create Master Recipe'}
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-white/80 hover:text-white p-1"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-3">
+            <form onSubmit={handleSubmit} className="p-5 space-y-4 font-body text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-[#57534E] mb-1">Recipe Name *</label>
+                  <label className="block font-mono font-bold uppercase text-on-surface-variant mb-1">
+                    Recipe / Dish Name
+                  </label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Dal Tadka, Jeera Rice"
+                    placeholder="e.g. Toor Dal Tadka, Jeera Basmati Rice"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full border border-[#E7E5E4] rounded-lg px-3 py-2 bg-white outline-none text-sm"
+                    className="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-xs font-bold text-on-surface outline-none focus:border-primary"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-[#57534E] mb-1">Meal Category</label>
+                  <label className="block font-mono font-bold uppercase text-on-surface-variant mb-1">
+                    Tiffin Category
+                  </label>
                   <select
                     value={mealCategory}
                     onChange={(e) => setMealCategory(e.target.value)}
-                    className="w-full border border-[#E7E5E4] rounded-lg px-3 py-2 bg-white outline-none capitalize"
+                    className="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-xs font-medium text-on-surface outline-none focus:border-primary"
                   >
-                    {MEAL_CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
+                    {MEAL_CATEGORIES.filter((c) => c.id !== 'all').map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.label}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
 
-              {/* Ingredients per portion */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="font-semibold text-[#57534E]">Ingredients per Portion *</label>
+                <label className="block font-mono font-bold uppercase text-on-surface-variant mb-1">
+                  Dietary Labels (comma separated)
+                </label>
+                <input
+                  type="text"
+                  placeholder="vegetarian, jain, high-protein, gluten-free"
+                  value={dietaryLabels}
+                  onChange={(e) => setDietaryLabels(e.target.value)}
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-xs font-mono text-on-surface outline-none focus:border-primary"
+                />
+              </div>
+
+              {/* Bill of Materials Ingredient Allocator */}
+              <div className="border border-outline-variant/60 rounded-xl p-3 bg-surface-container-low/60 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="font-mono font-bold uppercase text-on-surface-variant text-[11px]">
+                    Ingredients Bill of Materials (per single dabba portion)
+                  </label>
                   <button
                     type="button"
                     onClick={handleAddIngredientRow}
-                    className="text-[#1B4332] font-semibold flex items-center gap-1 hover:underline text-[11px]"
+                    className="btn-surface text-[10px] font-mono py-1 px-2"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    Add Ingredient
+                    + Add Ingredient Row
                   </button>
                 </div>
 
                 <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                  {recipeIngredients.map((row, index) => (
-                    <div key={index} className="flex items-center gap-2 bg-[#FBF9F5] p-2 rounded-lg border border-[#E7E5E4]">
+                  {recipeIngredients.map((row, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
                       <select
                         value={row.ingredient_id}
-                        onChange={(e) => handleUpdateIngredientRow(index, 'ingredient_id', e.target.value)}
-                        className="flex-1 border border-[#E7E5E4] rounded px-2 py-1 bg-white outline-none capitalize"
+                        onChange={(e) =>
+                          handleUpdateIngredientRow(idx, 'ingredient_id', e.target.value)
+                        }
+                        className="flex-1 bg-white border border-outline-variant rounded px-2.5 py-1.5 text-xs text-on-surface font-medium outline-none"
                       >
                         {ingredients.map((ing) => (
                           <option key={ing.id} value={ing.id}>
-                            {ing.name} ({ing.unit})
+                            {ing.name} (₹{ing.cost_per_unit}/{ing.unit})
                           </option>
                         ))}
                       </select>
 
-                      <input
-                        type="number"
-                        step="0.001"
-                        min="0.001"
-                        required
-                        placeholder="Qty"
-                        value={row.quantity_per_portion}
-                        onChange={(e) =>
-                          handleUpdateIngredientRow(index, 'quantity_per_portion', e.target.value)
-                        }
-                        className="w-20 border border-[#E7E5E4] rounded px-2 py-1 bg-white outline-none font-mono text-center"
-                      />
-
-                      <span className="text-stone-500 font-mono w-10 text-center">{row.unit}</span>
+                      <div className="w-24 flex items-center gap-1 font-mono">
+                        <input
+                          type="number"
+                          step="0.001"
+                          min="0.001"
+                          required
+                          value={row.quantity_per_portion}
+                          onChange={(e) =>
+                            handleUpdateIngredientRow(
+                              idx,
+                              'quantity_per_portion',
+                              e.target.value
+                            )
+                          }
+                          className="w-full bg-white border border-outline-variant rounded px-2 py-1.5 text-xs font-bold text-right"
+                        />
+                        <span className="text-on-surface-variant text-[11px] w-6">
+                          {row.unit}
+                        </span>
+                      </div>
 
                       <button
                         type="button"
-                        onClick={() => handleRemoveIngredientRow(index)}
-                        className="text-stone-400 hover:text-red-600 p-1"
-                        title="Remove"
+                        onClick={() => handleRemoveIngredientRow(idx)}
+                        className="text-on-surface-variant hover:text-error p-1"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   ))}
                 </div>
+
+                {/* Live Cost Calculation Bar */}
+                <div className="pt-2 border-t border-outline-variant/40 flex items-center justify-between font-mono text-xs">
+                  <span className="text-on-surface-variant">Calculated Ingredient Cost per Portion:</span>
+                  <span className="font-headline font-bold text-base text-primary">
+                    ₹{liveFormPortionCost.toFixed(2)}
+                  </span>
+                </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-[#57534E] mb-1">
-                  Dietary Labels (comma separated)
+                <label className="block font-mono font-bold uppercase text-on-surface-variant mb-1">
+                  Station Prep Notes
                 </label>
-                <input
-                  type="text"
-                  placeholder="vegetarian, vegan, gluten-free, jain"
-                  value={dietaryLabels}
-                  onChange={(e) => setDietaryLabels(e.target.value)}
-                  className="w-full border border-[#E7E5E4] rounded-lg px-3 py-2 bg-white outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-[#57534E] mb-1">Preparation Notes</label>
                 <textarea
                   rows={2}
-                  placeholder="Cooking instructions, portion specs (e.g. 3 chapatis per tiffin)"
+                  placeholder="e.g. Kettle 2 • Temper with mustard seeds, curry leaves & garlic at 10:45 AM"
                   value={prepNotes}
                   onChange={(e) => setPrepNotes(e.target.value)}
-                  className="w-full border border-[#E7E5E4] rounded-lg p-2 bg-white outline-none"
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 text-xs font-body text-on-surface outline-none focus:border-primary"
                 />
               </div>
 
-              <div className="pt-3 border-t border-[#E7E5E4] flex justify-end gap-2">
+              <div className="pt-2 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="btn-outline px-4 py-2"
+                  className="px-4 py-2 border border-outline-variant rounded-lg hover:bg-surface-container text-on-surface font-semibold"
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn-forest px-5 py-2 font-semibold">
-                  {editingRecipe ? 'Save Recipe' : 'Create Recipe'}
+                <button
+                  type="submit"
+                  className="btn-primary text-xs"
+                >
+                  {editingRecipe ? 'Update Recipe' : 'Save Master Recipe'}
                 </button>
               </div>
             </form>

@@ -138,6 +138,20 @@ async def disconnect_db():
 
 def get_db() -> Optional[AsyncIOMotorDatabase]:
     """Get the active database instance. Returns None if not connected."""
+    global _client, _db
+    if _client is not None and settings.db_available:
+        try:
+            io_loop = _client.get_io_loop()
+            if io_loop is not None and io_loop.is_closed():
+                _client = AsyncIOMotorClient(
+                    settings.MONGODB_URI,
+                    serverSelectionTimeoutMS=5000,
+                    connectTimeoutMS=5000,
+                    socketTimeoutMS=5000,
+                )
+                _db = _client[settings.database_name]
+        except Exception:
+            pass
     return _db
 
 

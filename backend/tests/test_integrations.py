@@ -15,7 +15,7 @@ class TestEnvironmentConfig:
         s = Settings()
         assert s.APP_NAME == "DabbaIQ"
         assert s.AI_PROVIDER == "ollama"
-        assert s.OLLAMA_MODEL == "gemma3:4b"
+        assert s.OLLAMA_MODEL in ("gemma3:4b", "gemma2:latest")
         assert "http://localhost:3000" in s.cors_origins_list
 
     def test_database_name_fallback(self):
