@@ -3,7 +3,12 @@ Ensures every frontend API call maps to a registered FastAPI route.
 """
 
 import pytest
+from starlette.testclient import TestClient
 from app.main import app
+
+@pytest.fixture
+def client():
+    return TestClient(app)
 
 # List of endpoints invoked by the Next.js frontend (extracted from frontend/lib/api.ts)
 FRONTEND_ENDPOINTS = [
@@ -87,10 +92,116 @@ def test_every_frontend_endpoint_is_registered_in_fastapi():
 
 
 def test_cors_middleware_configuration():
-    """Verify CORS middleware is active and allows methods and headers."""
+    """Verify CORS middleware is active and explicitly configured."""
     cors_middleware = next(
         (m for m in app.user_middleware if "CORSMiddleware" in str(m.cls)),
         None
     )
     assert cors_middleware is not None
+    assert "https://dabba-iq.vercel.app" in cors_middleware.kwargs["allow_origins"]
     assert "http://localhost:3000" in cors_middleware.kwargs["allow_origins"]
+    assert cors_middleware.kwargs["allow_credentials"] is True
+    assert "GET" in cors_middleware.kwargs["allow_methods"]
+    assert "POST" in cors_middleware.kwargs["allow_methods"]
+    assert "PATCH" in cors_middleware.kwargs["allow_methods"]
+    assert "DELETE" in cors_middleware.kwargs["allow_methods"]
+
+
+def test_cors_preflight_production_vercel_origin_health(client):
+    """Verify OPTIONS preflight on /api/health succeeds for production Vercel frontend."""
+    res = client.options(
+        "/api/health",
+        headers={
+            "Origin": "https://dabba-iq.vercel.app",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "Content-Type",
+        },
+    )
+    assert res.status_code == 200
+    assert res.headers.get("access-control-allow-origin") == "https://dabba-iq.vercel.app"
+    assert res.headers.get("access-control-allow-credentials") == "true"
+    assert "GET" in res.headers.get("access-control-allow-methods", "")
+
+
+def test_cors_preflight_production_vercel_origin_ai_status(client):
+    """Verify OPTIONS preflight on /api/ai/status succeeds for production Vercel frontend."""
+    res = client.options(
+        "/api/ai/status",
+        headers={
+            "Origin": "https://dabba-iq.vercel.app",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "Content-Type",
+        },
+    )
+    assert res.status_code == 200
+    assert res.headers.get("access-control-allow-origin") == "https://dabba-iq.vercel.app"
+
+
+def test_cors_preflight_production_vercel_origin_dashboard(client):
+    """Verify OPTIONS preflight on /api/dashboard with query params succeeds for production Vercel frontend."""
+    res = client.options(
+        "/api/dashboard?date=2026-10-17",
+        headers={
+            "Origin": "https://dabba-iq.vercel.app",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "Content-Type",
+        },
+    )
+    assert res.status_code == 200
+    assert res.headers.get("access-control-allow-origin") == "https://dabba-iq.vercel.app"
+
+
+def test_cors_preflight_post_methods_and_custom_headers(client):
+    """Verify OPTIONS preflight on POST endpoint with multiple headers succeeds."""
+    res = client.options(
+        "/api/inventory",
+        headers={
+            "Origin": "https://dabba-iq.vercel.app",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "Content-Type, Authorization, Accept",
+        },
+    )
+    assert res.status_code == 200
+    assert res.headers.get("access-control-allow-origin") == "https://dabba-iq.vercel.app"
+    assert "POST" in res.headers.get("access-control-allow-methods", "")
+
+
+def test_cors_preflight_patch_and_delete_methods(client):
+    """Verify OPTIONS preflight on PATCH and DELETE operations."""
+    for method in ["PATCH", "DELETE"]:
+        res = client.options(
+            "/api/inventory/item-123",
+            headers={
+                "Origin": "https://dabba-iq.vercel.app",
+                "Access-Control-Request-Method": method,
+                "Access-Control-Request-Headers": "Content-Type",
+            },
+        )
+        assert res.status_code == 200
+        assert res.headers.get("access-control-allow-origin") == "https://dabba-iq.vercel.app"
+
+
+def test_cors_preflight_rejected_for_unauthorized_origin(client):
+    """Verify OPTIONS preflight strictly rejects unauthorized origins with 400 Bad Request."""
+    res = client.options(
+        "/api/health",
+        headers={
+            "Origin": "https://malicious-attacker-domain.com",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+    assert res.status_code == 400
+    assert "Disallowed CORS origin" in res.text
+
+
+def test_cors_preflight_rejected_for_disallowed_method(client):
+    """Verify OPTIONS preflight strictly rejects disallowed methods."""
+    res = client.options(
+        "/api/health",
+        headers={
+            "Origin": "https://dabba-iq.vercel.app",
+            "Access-Control-Request-Method": "TRACE",
+        },
+    )
+    assert res.status_code == 400
+    assert "Disallowed CORS method" in res.text

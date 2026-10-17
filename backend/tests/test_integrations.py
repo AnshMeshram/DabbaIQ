@@ -26,6 +26,25 @@ class TestEnvironmentConfig:
         s = Settings(FRONTEND_ORIGIN="https://mykitchen.com")
         assert "https://mykitchen.com" in s.cors_origins_list
 
+    def test_cors_origins_normalization_strips_trailing_slashes_and_quotes(self):
+        s = Settings(
+            FRONTEND_ORIGIN="https://dabba-iq.vercel.app/",
+            CORS_ORIGINS=" 'https://preview.vercel.app/' , \"https://custom-domain.com/\" , http://localhost:3000/ "
+        )
+        origins = s.cors_origins_list
+        assert "https://dabba-iq.vercel.app" in origins
+        assert "https://dabba-iq.vercel.app/" not in origins
+        assert "https://preview.vercel.app" in origins
+        assert "https://preview.vercel.app/" not in origins
+        assert "https://custom-domain.com" in origins
+        assert "https://custom-domain.com/" not in origins
+        assert "http://localhost:3000" in origins
+        assert "http://localhost:3000/" not in origins
+
+    def test_default_production_origin_always_included(self):
+        s = Settings(FRONTEND_ORIGIN="", CORS_ORIGINS="")
+        assert "https://dabba-iq.vercel.app" in s.cors_origins_list
+
     def test_unconfigured_partners_are_falsy(self):
         s = Settings(
             ELEVENLABS_API_KEY="",

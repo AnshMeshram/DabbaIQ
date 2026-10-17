@@ -55,8 +55,36 @@ class Settings(BaseSettings):
     TINKER_API_KEY: Optional[str] = None
 
     # CORS & Network
-    FRONTEND_ORIGIN: str = "http://localhost:3000"
-    CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
+    FRONTEND_ORIGIN: Optional[str] = "https://dabba-iq.vercel.app"
+    CORS_ORIGINS: str = "https://dabba-iq.vercel.app,http://localhost:3000,http://127.0.0.1:3000"
+    DEFAULT_PRODUCTION_ORIGIN: str = "https://dabba-iq.vercel.app"
+    CORS_ALLOW_METHODS: List[str] = [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "OPTIONS",
+        "HEAD",
+    ]
+    CORS_ALLOW_HEADERS: List[str] = [
+        "Content-Type",
+        "Authorization",
+        "Accept",
+        "Origin",
+        "X-Requested-With",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers",
+        "Range",
+        "Cache-Control",
+        "Pragma",
+    ]
+    CORS_EXPOSE_HEADERS: List[str] = [
+        "Content-Length",
+        "Content-Type",
+        "Content-Range",
+    ]
+    CORS_MAX_AGE: int = 86400  # 24 hours
 
     # Business defaults
     DEFAULT_SAFETY_BUFFER: float = 0.15  # 15% extra portions
@@ -70,12 +98,23 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins_list(self) -> List[str]:
-        """Combine CORS_ORIGINS and FRONTEND_ORIGIN into a deduplicated list."""
-        origins = [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
-        if self.FRONTEND_ORIGIN and self.FRONTEND_ORIGIN.strip():
-            fo = self.FRONTEND_ORIGIN.strip()
-            if fo not in origins:
-                origins.append(fo)
+        """Combine CORS_ORIGINS, FRONTEND_ORIGIN, and default production Vercel origin into a clean deduplicated list."""
+        raw_entries: List[str] = []
+        if self.CORS_ORIGINS:
+            raw_entries.extend(self.CORS_ORIGINS.split(","))
+        if self.FRONTEND_ORIGIN:
+            raw_entries.append(self.FRONTEND_ORIGIN)
+        if self.DEFAULT_PRODUCTION_ORIGIN:
+            raw_entries.append(self.DEFAULT_PRODUCTION_ORIGIN)
+
+        origins: List[str] = []
+        seen = set()
+        for item in raw_entries:
+            # Strip surrounding whitespace, single quotes, double quotes, and trailing slashes
+            cleaned = item.strip(" '\"\t\r\n").rstrip("/")
+            if cleaned and cleaned not in seen:
+                seen.add(cleaned)
+                origins.append(cleaned)
         return origins
 
     @property
