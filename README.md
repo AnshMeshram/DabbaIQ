@@ -8,7 +8,7 @@
 [![MongoDB Atlas](https://img.shields.io/badge/MongoDB-Atlas_6.0%2B-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://cloud.mongodb.com/)
 [![Open-Weight AI](https://img.shields.io/badge/Gemma_2%2F3-Ollama_Inference-blueviolet?style=for-the-badge&logo=google&logoColor=white)](https://ollama.ai/)
 [![Test Suite](https://img.shields.io/badge/Pytest-101%2F101_PASSED-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://pytest.org/)
-[![Deploy on Vercel](https://img.shields.io/badge/Vercel-Frontend_Deploy-black?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
+[![Deploy on Vercel](https://img.shields.io/badge/Vercel-Live_App-black?style=for-the-badge&logo=vercel&logoColor=white)](https://dabba-iq.vercel.app/)
 [![Deploy on Render](https://img.shields.io/badge/Render-Backend_PaaS-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://render.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
@@ -16,7 +16,7 @@
 
 An enterprise-grade, open-weight AI kitchen operations desk built for Indian tiffin subscription services, cloud kitchens, and meal prep entrepreneurs. Designed from a **26-screen Google Stitch canvas**, pairing **deterministic demand forecasting** with **Gemma 3 open-weight reasoning**.
 
-[🚀 Live Experience Demo](#-interactive-route-tour) • [📐 System Architecture](#-system-architecture) • [⚡ Quickstart](#-local-development-quickstart) • [☁️ Vercel + Render Deployment](#-cloud-deployment-guide) • [🧪 101/101 Tests](#-verified-quality-gates--test-suite)
+[🚀 Live Web App (Vercel)](https://dabba-iq.vercel.app/) • [🍱 3D Tiffin Experience](https://dabba-iq.vercel.app/experience) • [📐 Architecture](#-system-architecture) • [⚡ Quickstart](#-local-development-quickstart) • [☁️ Deployment](#-cloud-deployment-guide) • [🧪 101/101 Tests](#-verified-quality-gates--test-suite)
 
 </div>
 
@@ -234,8 +234,8 @@ DabbaIQ is pre-configured for instant zero-downtime deployment using **Vercel** 
    - `DEBUG`: `false`
    - `MONGODB_DATABASE`: `dabbaiq`
    - `MONGODB_URI`: `mongodb+srv://user:pass@cluster.mongodb.net/?retryWrites=true&w=majority`
-   - `FRONTEND_ORIGIN`: `https://your-dabbaiq.vercel.app`
-   - `CORS_ORIGINS`: `https://your-dabbaiq.vercel.app,http://localhost:3000`
+   - `FRONTEND_ORIGIN`: `https://dabba-iq.vercel.app`
+   - `CORS_ORIGINS`: `https://dabba-iq.vercel.app,http://localhost:3000`
 
 ### Step 2: Vercel Frontend Configuration
 1. In the [Vercel Dashboard](https://vercel.com/), click **Add New...** > **Project** and import this repository.
