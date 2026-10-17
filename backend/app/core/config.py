@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "gemma3:4b"
     OLLAMA_TIMEOUT: int = 120
+    AI_FALLBACK_ENABLED: bool = True
 
     # SerpAPI Supplier Price Search
     SERPAPI_API_KEY: Optional[str] = None

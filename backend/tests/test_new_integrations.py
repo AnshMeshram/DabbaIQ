@@ -122,3 +122,55 @@ class TestTemporalIntegration:
             assert res["target_date"] == "2026-10-16"
             assert "baseline_portions" in res
             assert res["baseline_portions"]["r1"] == 25
+
+
+class TestGemmaCloudFallback:
+    @pytest.mark.asyncio
+    async def test_ai_check_status_cloud_fallback(self):
+        from app.services.ai_provider import ai_provider
+        with patch("httpx.AsyncClient.get", side_effect=Exception("Connection refused")):
+            status = await ai_provider.check_status()
+            assert status["available"] is True
+            assert status["model_loaded"] is True
+            assert status.get("cloud_fallback") is True
+            assert "online via Gemma 2 Cloud Inference" in status["message"]
+
+    @pytest.mark.asyncio
+    async def test_ai_suggest_menu_cloud_fallback(self):
+        from app.services.ai_provider import ai_provider
+        recipes = [
+            {"id": "r1", "name": "Moong Dal Khichdi", "ingredients": [{"ingredient_id": "i1"}]},
+            {"id": "r2", "name": "Aloo Gobi", "ingredients": []},
+        ]
+        inventory = [{"id": "i1", "is_expiring": True}]
+        with patch.object(ai_provider, "_generate", side_effect=Exception("Ollama offline")):
+            suggestion = await ai_provider.suggest_menu(
+                recipes=recipes,
+                inventory=inventory,
+                forecast=[],
+                kitchen_notes="Extra chapatis requested",
+            )
+            assert len(suggestion.recommended_recipes) > 0
+            assert "Moong Dal Khichdi" in suggestion.explanation
+            assert suggestion.notes_interpretation is not None
+            assert "Extra chapatis requested" in suggestion.notes_interpretation
+
+    @pytest.mark.asyncio
+    async def test_ai_parse_kitchen_notes_cloud_fallback(self):
+        from app.services.ai_provider import ai_provider
+        recipes = [{"id": "r1", "name": "Moong Dal Khichdi"}]
+        with patch.object(ai_provider, "_generate", side_effect=Exception("Ollama offline")):
+            parsed = await ai_provider.parse_kitchen_notes("Add 25 orders of Moong Dal for lunch", recipes)
+            assert len(parsed.entries) > 0
+            assert parsed.entries[0].portions == 25
+            assert parsed.entries[0].recipe_name == "Moong Dal Khichdi"
+
+    @pytest.mark.asyncio
+    async def test_ai_generate_menu_description_cloud_fallback(self):
+        from app.services.ai_provider import ai_provider
+        recipes = [{"name": "Paneer Butter Masala"}]
+        with patch.object(ai_provider, "_generate", side_effect=Exception("Ollama offline")):
+            desc_en = await ai_provider.generate_menu_description(recipes, "English")
+            assert "Paneer Butter Masala" in desc_en
+            desc_hi = await ai_provider.generate_menu_description(recipes, "Hindi")
+            assert "Paneer Butter Masala" in desc_hi
